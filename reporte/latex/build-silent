@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+import subprocess
+import sys
+
+try:
+    subprocess.run(
+        ["latexmk", "-lualatex", "-shell-escape", "-silent", "main.tex"],
+        check=True
+    )
+except FileNotFoundError:
+    sys.exit("Error: latexmk no encontrado. Instala las dependencias de LaTeX y asegúrate que esté en PATH.")
+except subprocess.CalledProcessError as e:
+    sys.exit(f"latexmk falló: {e.returncode}")

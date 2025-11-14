@@ -1,0 +1,55 @@
+%% NOTE(srp): Queda un poco de configuración en util/incluye
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{util/configuracion}[2025/09/28 Configuracion de paquetes]
+
+\RequirePackage{util/incluye}
+
+%% Fuentes tipográficas
+\setmainfont{Libertinus Serif}
+\setsansfont{Libertinus Sans}
+\setmonofont{JetBrains Mono}
+
+%% La letra grande al inicio del contenido
+\renewcommand{\LettrineFontHook}{\bfseries}
+%\renewcommand{\LettrineTextFont}{\normalfont}
+
+%% Bloques de IEEE
+\newfontfamily\AuthorFont{TeX Gyre Termes}
+\makeatletter
+\def\@IEEEauthorblockNstyle{\AuthorFont\normalsize\bfseries}
+\def\@IEEEauthorblockAstyle{\normalfont\AuthorFont\small}
+\def\IEEEkeywordsname{Palabras clave}
+\makeatother
+
+%% Título
+\newfontfamily\TitleFont{Libertinus Sans}[Letters=SmallCaps]
+\newcommand{\Title}[1]{\Huge\TitleFont #1}
+
+%% Tikz
+\usetikzlibrary{arrows,decorations.pathmorphing,
+                calc,chains,automata,positioning,
+                babel}
+
+%% Imágenes
+\graphicspath{ {img/} }
+
+%% Enlaces
+\definecolor{CoolGray}{HTML}{4D4D4D}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=CoolGray,
+    citecolor=CoolGray,
+    filecolor=CoolGray,
+    urlcolor=CoolGray
+}
+
+%% Referencias
+\addbibresource{referencias.bib}
+\setlength\bibitemsep{0.5\baselineskip}
+
+%% Tamaño de hoja
+%\geometry{letterpaper}
+%\addtolength{\voffset}{-1.5cm}
+%\addtolength{\hoffset}{-1.5cm}
+%\addtolength{\textwidth}{3cm}
+%\addtolength{\textheight}{3cm}

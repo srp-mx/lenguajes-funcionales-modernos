@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+import os
+
+# Archivos que no queremos borrar
+exclusions = ('.tex', '.pdf', '.bib', 'README.md')
+
+for fname in os.listdir('.'):
+    if '.' not in fname:
+        continue
+    if fname.endswith(exclusions) or fname == 'README.md':
+        continue
+    try:
+        os.remove(fname)
+        print(f"Limpiado {fname}")
+    except IsADirectoryError:
+        # Skip directories
+        pass
+    except Exception as e:
+        print(f"No se pudo borrar {fname}: {e}")

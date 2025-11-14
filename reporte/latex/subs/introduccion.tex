@@ -1,0 +1,44 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+
+%% TODO: Esto es del proyecto anterior
+
+\PARstart{L}os lenguajes de programación constituyen especificaciones
+mediante las cuales los programadores pueden definir secuencias de tareas
+a ejecutar por una computadora, llamadas programas, comúnmente
+haciendo uso de un lenguaje más cercano al entendimiento humano. 
+Por ello, se requiere que los programas pasen por un proceso de traducción
+que permita obtener una representación entendible y ejecutable por la máquina.
+
+Llamamos \textbf{compilador} al software encargado de realizar
+esta traducción, compuesta por distintas fases que permiten comprender
+la estructura del \textbf{programa fuente} y transformarla sin dejar de
+asegurar que la nueva representación, el \textbf{programa objeto},
+sea correcta, eficiente y que conserve su significado original. 
+
+Generalmente, este proceso se divide en dos grandes fases: la fase de
+\textit{análisis} y la fase de \textit{síntesis}. La fase de análisis
+se encarga de procesar el programa fuente para asegurar su correctitud
+y definir de manera unívoca su estructura lógica mediante una
+\textbf{representación intermedia}; por otro lado, la fase de síntesis
+utiliza dicha representación para generar el programa objeto equivalente.
+
+La fase de análisis está compuesta por tres etapas: 
+\textit{análisis léxico}, \textit{análisis sintáctico} y 
+\textit{análisis semántico}, cada una diseñada para abordar un nivel 
+específico de la comprensión del programa fuente.
+
+En este proyecto nos centraremos en la etapa del 
+\textbf{análisis léxico}, cuyo objetivo es reconocer los \textbf{componentes
+léxicos} o \textit{tokens} que constituyen el programa fuente. 
+Para ello, implementaremos en \textit{Haskell} un analizador léxico
+construido desde cero, aplicando los principios teóricos y algoritmos
+de los \textbf{autómatas finitos} y \textbf{lenguajes formales}.
+Dicha implementación busca no sólo validar la teoría, sino también
+fortalecer la comprensión práctica de los procesos de traducción
+en compiladores.
+
+\end{document}
+

@@ -1,0 +1,86 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{util/comandos}[2025/09/28 Comandos]
+
+\RequirePackage{util/incluye}
+
+%% Email
+\newcommand{\email}[1]{{\footnotesize\href{mailto:#1}{\texttt{#1}}}}
+
+%% Mayúscula grande inicial
+\newcommand{\PARstart}[2]{%
+  \lettrine[lines=2,lhang=0.1,nindent=0em]{#1}{#2}%
+}
+
+%% Texto con subrayado de líneas punteadas ---
+\newcommand{\udash}[1]{%
+    \tikz[baseline=(todotted.base)]{
+        \node[inner sep=1pt,outer sep=0pt] (todotted) {#1};
+        \draw[dashed] (todotted.south west) -- (todotted.south east);
+    }%
+}
+
+%% Texto con subrayado punteado ...
+\newcommand{\udots}[1]{%
+    \tikz[baseline=(todotted.base)]{
+        \node[inner sep=1pt,outer sep=0pt] (todotted) {#1};
+        \draw[dotted] (todotted.south west) -- (todotted.south east);
+    }%
+}%
+
+%% SÍMBOLOS ÚTILES
+\newcommand{\pd}{\underline{\textbf{PD}}: } % Por demostrar
+\newcommand{\defn}[1]{\textit{\underline{Def.} \udash{#1}}}
+\newcommand{\boldit}[1]{\textbf{\textit{#1}}} % bold + itálicas
+\newcommand{\cjto}[1]{\left\{ #1 \right\}} % paréntesis que ajustan su tamaño
+\newcommand{\pp}[1]{\left( #1 \right)} % paréntesis que ajustan su tamaño
+\newcommand{\ppsq}[1]{\left[ #1 \right]} % corchetes que ajustan su tamaño
+\newcommand{\picos}[1]{\left\langle #1 \right\rangle} % picoparéntesis
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\newcommand{\techo}[1]{\ceil*{#1}}
+\newcommand{\piso}[1]{\floor*{#1}}
+\newcommand\concat{\ensuremath{\mathbin{+\mkern-5mu+}}}
+
+%% PALABRAS ALGORITMOS
+% https://ctan.math.utah.edu/ctan/tex-archive/macros/latex/contrib/algorithms/algorithms.pdf
+\renewcommand{\algorithmicrequire}{\textbf{Entrada:}}
+\renewcommand{\algorithmicensure}{\textbf{Salida:}}
+\newcommand{\AndB}{\textbf{and} }
+\newcommand{\OrB}{\textbf{or} }
+\newcommand{\XorB}{\textbf{xor} }
+\newcommand{\NotB}{\textbf{not} }
+
+\makeatletter
+
+% USO
+% \begin{algoritmo}{NombreAlgoritmo}{Ancho}{Etiqueta}
+%     ...
+% \end{algoritmo}
+%
+% EJEMPLO
+% \begin{algoritmo}{StupidSort}{2.5in}{alg:stupidSort}
+%     \Require $A[0 \dots n-1]$
+%     \Ensure $A$ ordenado
+%     \If{$n=2$ \AndB $A[0]>A[1]$}
+%         \State swap $A[0] \leftrightarrow A[1]$
+%     \ElsIf{$n>2$}
+%         \State $m \leftarrow \techo{2n/3}$
+%         \State \texttt{StupidSort}($A[0 \dots m-1]$)
+%         \State \texttt{StupidSort}($A[n-m \dots n-1]$)
+%         \State \texttt{StupidSort}($A[0 \dots m-1]$)
+%     \EndIf
+% \end{algoritmo}
+\NewEnviron{algoritmo}[3]{
+    \begin{center}
+    \begin{minipage}{#2}
+    \begin{algorithm}[H]
+    \caption{\texttt{#1}}\label{#3}
+    \begin{algorithmic}
+        \BODY
+    \end{algorithmic}
+    \end{algorithm}
+    \end{minipage}
+    \end{center}
+}
+
+\makeatother

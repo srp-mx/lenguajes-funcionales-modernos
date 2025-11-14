@@ -1,0 +1,54 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{util/incluye}[2025/09/28 Lista de paquetes]
+
+% Asigna la tipografía
+\RequirePackage{fontspec}
+% Colores con nombres
+\RequirePackage[dvipsnames]{xcolor}
+% En teoría mejora la legibilidad del texto automáticamente
+\RequirePackage{microtype}
+% Idioma
+\RequirePackage[spanish, mexico]{babel}
+% Listas
+\RequirePackage{enumitem}
+% Símbolos matemáticos
+\RequirePackage{amsmath, amssymb, amsfonts, mathtools}
+% Texto de algoritmos
+\RequirePackage{float}
+\RequirePackage[Algoritmo]{algorithm}
+\RequirePackage[noend]{algpseudocode}
+% Imágenes
+\RequirePackage{graphicx}
+% Dibujitos
+\RequirePackage{tikz}
+% Enlaces presionables
+\RequirePackage{hyperref}
+% Referencias y citas
+\RequirePackage[
+    backend=biber,
+    style=ieee,
+    sorting=none,
+    language=spanish
+]{biblatex}
+% Para tener subarchivos y juntarlos en un sólo documento
+\RequirePackage{subfiles}
+% Para los saltos de línea
+\RequirePackage{parskip}
+% Para crear ambientes personalizados (begin/end)
+\RequirePackage{environ}
+% Para poder crear comillas ""
+\RequirePackage{dirtytalk}
+% Para código
+\RequirePackage{minted} %\RequirePackage{listings}
+% Tablas con titulos
+\RequirePackage{array}
+% Tablas más bonitas
+\RequirePackage{booktabs}
+% Directorios
+\RequirePackage{dirtree}
+% Para mejorar comillas y citas tipográficas
+\RequirePackage{csquotes}
+% Para letra grande al iniciar el reporte
+\RequirePackage{lettrine}
+% Para relleno
+\RequirePackage{lipsum}
