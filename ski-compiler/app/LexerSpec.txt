@@ -1,0 +1,18 @@
+-- Nuestro cálculo SKI tiene cadenas como extensión, las cuales al ser
+-- aplicadas son concatenadas
+
+-- Los combinadores
+comb-s --> S+s
+comb-k --> K+k
+comb-i --> I+i
+-- Paréntesis
+par-op --> \(
+par-cl --> \)
+-- Cadenas multilínea con "
+string --> "([^"\\] + \\" + \\\\)*[^\\]"
+-- Espacio en blanco
+;white --> \s(\s)*
+-- Comentario una línea
+;comnt --> //([^\n])*
+-- Comentario multilínea
+;mcomt --> /\*([^\*] + \*[^/])*\*/

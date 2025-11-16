@@ -1,0 +1,26 @@
+cabal-version:      3.0
+name:               ski-compiler
+version:            0.1.0.0
+license:            GPL-3.0-only
+license-file:       LICENSE
+author:             Santiago Romero, Arlet Pinacho, Juvenal Guzman, Ricardo Ivan Martinez
+maintainer:         srp.devel@gmail.com
+category:           Language
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+
+common warnings
+    ghc-options: -Wall
+
+executable ski-compiler
+    import:           warnings
+    main-is:          Main.hs
+    other-modules:    Lexer, Parser, CodeGenerator
+    hs-source-dirs:   app
+    ghc-options:      -optl-pthread
+    build-depends:
+        base ^>=4.18.3.0,
+        text >= 2.0.2 && < 2.1,
+        bytestring >= 0.11.5 && < 0.12,
+        process >= 1.6.19
+    default-language: GHC2021
