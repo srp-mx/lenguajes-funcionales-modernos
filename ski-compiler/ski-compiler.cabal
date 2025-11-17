@@ -24,11 +24,12 @@ common common-settings
 executable ski-compiler-strict
     import:           common-settings
     main-is:          Main.hs
-    other-modules:    Lexer, Parser, CodeGenerator, Expr
+    other-modules:    Lexer, Parser, CodeGenerator, Expr, Util
     hs-source-dirs:   app, app/ski-parse, app/strict
 
 executable lambda-compiler-strict
     import:           common-settings
     main-is:          Main.hs
-    other-modules:    Lexer, Parser, CodeGenerator, Expr
-    hs-source-dirs:   app, app/lambda-parse, app/strict
+    other-modules:    Lexer, Parser, LambdaParser, LambdaDesugar, Lambda,
+                      CodeGenerator, Expr, Util
+    hs-source-dirs:   app, app/lambda-parse, app/strict, app/lambda-parse/util

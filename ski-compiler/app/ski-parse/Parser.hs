@@ -66,18 +66,6 @@ tokInfo t = " [leído '" ++ lcStr (tkCat t) ++ "' en: " ++ pos ++ "]"
           b = "Byte#" ++ show (mtkByte $ tkMeta t)
           pos = l ++ " " ++ c ++ ", i.e. " ++ i ++ " " ++ b
 
--- |Extrae la cadena del lexema
-lcStr :: LexCat -> String
-lcStr (Comb_s_tk s) = s
-lcStr (Comb_k_tk s) = s
-lcStr (Comb_i_tk s) = s
-lcStr (Par_op_tk s) = s
-lcStr (Par_cl_tk s) = s
-lcStr (String_tk s) = s
-lcStr (White_tk s) = s
-lcStr (Comnt_tk s) = s
-lcStr (Mcomt_tk s) = s
-
 -- |Extrae la cadena del código fuente y aplica escapes y demás para que sea
 --  la cadena que representa el código fuente.
 parseStr :: String -> Expr

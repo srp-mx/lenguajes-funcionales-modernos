@@ -12,6 +12,7 @@
 module Lexer (
     lexer,
     lexerShow,
+    lcStr,
     LexCat(..),
     MetaToken(..),
     Token(..)
