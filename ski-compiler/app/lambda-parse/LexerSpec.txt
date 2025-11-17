@@ -1,0 +1,25 @@
+-- Nuestro cálculo lambda tiene cadenas como extensión, las cuales al ser
+-- aplicadas son concatenadas
+
+-- Ejemplos:
+-- lambda x . x y --> [x (x y)]
+-- y (lambda x . y y) --> (y [x (y y)])
+-- lambda x y z . x z (y z) --> [x [y [z ((x z) (y z))]]]
+-- x --> x
+
+-- Paréntesis de aplicación
+par-op --> \(
+par-cl --> \)
+-- Paréntesis de abstracción
+bra-op --> \[
+bra-cl --> \]
+-- Cadenas multilínea con "
+string --> "([^"\\] + \\" + \\\\)*[^\\]"
+-- Espacio en blanco
+;white --> \s(\s)*
+-- Comentario una línea
+;comnt --> //([^\n])*
+-- Comentario multilínea
+;mcomt --> /\*([^\*] + \*[^/])*\*/
+-- Identificador
+id --> (\Lu+\Ll+.)((\Lu+\Ll+\d+'+?+_+\-+.))*

@@ -1,9 +1,14 @@
 module CodeGenerator (
-    codeGen
+    codeGen,
+    codeGenInfo
 ) where
 
-import Parser
+import Expr
 import Data.List(intercalate)
+
+-- |Información de la generación de código
+codeGenInfo :: String
+codeGenInfo = "Generador de código SKI estricto"
 
 -- |Genera el programa objetivo en C++
 codeGen :: Expr -> String
