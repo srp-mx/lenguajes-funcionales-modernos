@@ -1,6 +1,10 @@
 module LambdaParser(
     parseLambda,
+    parseLambdaId,
+    parseLambdaT,
+    parseLambdaIdT,
     freeVariables,
+    tokInfo,
 ) where
 
 import Util
@@ -20,7 +24,26 @@ freeVariables (LAbs x l) xs = freeVariables l (HS.insert x xs)
 parseLambda :: String -> Either String Lambda
 parseLambda s = do
     ts <- lexer s
-    parseToks ts
+    parseLambdaT ts
+
+-- |Análisis sintáctico de una expresión lambda sobre tokens
+parseLambdaT :: [Token] -> Either String Lambda
+parseLambdaT = parseToks
+
+-- |Análisis sintáctico de un identificador
+parseLambdaId :: String -> Either String Id
+parseLambdaId s = do
+    ts <- lexer s
+    parseLambdaIdT ts
+
+-- |Análisis sintáctico de un identificador sobre tokens
+parseLambdaIdT :: [Token] -> Either String Id
+parseLambdaIdT ts = do
+    (x,ts') <- parseId ts
+    case ts' of
+        [] -> Right x
+        (t:_) -> Left $ "[ERROR (Parser)]: Sobraron tokens tras el identificador"
+                        ++ tokInfo t
 
 -- |Análisis sintáctico sobre los lexemas de una expresión lambda
 parseToks :: [Token] -> Either String Lambda

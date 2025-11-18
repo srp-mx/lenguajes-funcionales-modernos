@@ -1,6 +1,7 @@
 module Lambda(
     Id(..),
     Lambda(..),
+    showLambda,
 ) where
 
 import Lexer
@@ -23,3 +24,10 @@ data Lambda
     | LApp Lambda Lambda
     | LAbs Id Lambda
     deriving (Show,Eq)
+
+-- |Imprime una expresión formateada
+showLambda :: Lambda -> String
+showLambda (LId (Id s _)) = s
+showLambda (LStr s) = show s
+showLambda (LApp l1 l2) = "(" ++ showLambda l1 ++ " " ++ showLambda l2 ++ ")"
+showLambda (LAbs (Id s _) b) = "[\\" ++ s ++ " . " ++ showLambda b ++ "]"

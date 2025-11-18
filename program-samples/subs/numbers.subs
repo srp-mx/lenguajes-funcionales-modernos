@@ -1,0 +1,18 @@
+// Punto de entrada del programa
+main = ((Add Three) Seven);
+
+/**
+ Funciones auxiliares aritméticas
+*/
+
+// Cero como numeral de Church
+Zero = [f [x x]];
+// Tres como sucesor.. del cero
+Three = (Succ (Succ (Succ Zero)));
+// Siete como sucesor.. del cero
+Seven = (Succ (Succ (Succ (Succ (Succ (Succ (Succ Zero)))))));
+
+// Función sucesor
+Succ = [n [f [x (f ((n f) x))]]];
+// Función suma
+Add = [m [n [f [x ((m f) ((n f) x))]]]];

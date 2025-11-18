@@ -27,6 +27,7 @@ lambdaToExpr l =
     if HS.null $ freeVariables l HS.empty
     then toSki $ lambdaWithSki l
     else Left ("[ERROR (Parser)]: Variables libres\n"
+                ++ retab (showLambda l) ++ "\n"
                 ++ retab (intercalate "\n"
                   (map idInfo
                     (sortBy (\(Id _ m1) (Id _ m2) -> compare (mtkIdx m1) (mtkIdx m2))
