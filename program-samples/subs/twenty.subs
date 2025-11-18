@@ -1,0 +1,25 @@
+// Punto de entrada del programa
+main = ((Mul Four) Five);
+
+// Aritmética básica
+Zero = [f [x x]];
+Succ n = [f [x (f ((n f) x))]];
+Add m n = [f [x ((m f) ((n f) x))]];
+Four = (Succ (Succ (Succ (Succ Zero))));
+Five = (Succ (Succ (Succ (Succ (Succ Zero)))));
+
+// Booleanos
+True  = [t [f t]];
+False = [t [f f]];
+IsZero n = ((n [x False]) True);
+
+// Predecesor
+Pred n = [f [x (((n [g [h (h (g f))]]) [u x]) [u u])]];
+
+// Combinador Y
+Y f = ([x (f (x x))] [x (f (x x))]);
+
+// Multiplicación recursiva con Y
+// Mul m n = if (IsZero m) then Zero else Add n (Mul (Pred m) n)
+// Mul = (Y [self [m [n (((IsZero m) Zero) (Add n ((self (Pred m)) n))))]]);
+Mul = (Y [self [m [n (((IsZero m) Zero) ((Add n) ((self (Pred m)) n))) ] ] ]);
