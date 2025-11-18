@@ -1,9 +1,13 @@
 module Util(
     retab,
     pullOutError,
+    dups,
 ) where
 
 import Data.List(intercalate)
+import Data.Hashable(Hashable)
+
+import qualified Data.HashMap.Strict as HM
 
 -- |Agrega un nivel de indentación a la cadena
 retab :: String -> String
@@ -19,3 +23,8 @@ pullOutError = aux [] []
           aux accl _ [] = Left (intercalate "\n" $ reverse accl)
           aux accl accr (Left m:xs) = aux (m:accl) accr xs
           aux accl accr (Right x:xs) = aux accl (x:accr) xs
+
+-- |Determina los elementos duplicados
+dups :: (Eq a, Hashable a) => [a] -> [a]
+dups xs = HM.keys $ HM.filter (> (1::Int)) counts
+    where counts = HM.fromListWith (+) [(x,1) | x <- xs]

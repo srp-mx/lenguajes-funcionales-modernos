@@ -1,8 +1,10 @@
 module LambdaParser(
     parseLambda,
     parseLambdaId,
+    parseLambdaIds,
     parseLambdaT,
     parseLambdaIdT,
+    parseLambdaIdsT,
     freeVariables,
     tokInfo,
 ) where
@@ -44,6 +46,21 @@ parseLambdaIdT ts = do
         [] -> Right x
         (t:_) -> Left $ "[ERROR (Parser)]: Sobraron tokens tras el identificador"
                         ++ tokInfo t
+
+-- |Análisis sintáctico de uno o más identificadores
+parseLambdaIds :: String -> Either String [Id]
+parseLambdaIds s = do
+    ts <- lexer s
+    parseLambdaIdsT ts
+
+-- |Análisis sintáctico de uno o más identificadores sobre tokens
+parseLambdaIdsT :: [Token] -> Either String [Id]
+parseLambdaIdsT = aux []
+    where aux [] [] = Left "[ERROR (Parser)]: Se esperaba un identificador"
+          aux acc [] = Right (reverse acc)
+          aux acc ts = do
+            (x,ts') <- parseId ts
+            aux (x:acc) ts'
 
 -- |Análisis sintáctico sobre los lexemas de una expresión lambda
 parseToks :: [Token] -> Either String Lambda

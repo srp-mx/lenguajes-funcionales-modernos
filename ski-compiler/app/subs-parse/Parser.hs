@@ -36,13 +36,28 @@ parser s = do
 extractTuples :: String -> Either String [(Id, Lambda)]
 extractTuples s =
     let mapDef (x,def) = do
-            x' <- parseLambdaIdT x
+            xs <- parseLambdaIdsT x
+            xs' <- noDupIds xs
             def' <- parseLambdaT def
-            pure (x', def')
+            pure (head xs', includeLambdas def' $ tail xs')
     in do
         ts <- lexer s
         defs <- pullOutError $ map (splitTokEq []) (splitTokScol [] [] ts)
         pullOutError $ map mapDef defs
+
+-- |Nos aseguramos de no tener duplicados a la izquierda de una declaración
+noDupIds :: [Id] -> Either String [Id]
+noDupIds xs = case dups xs of
+    [] -> Right xs
+    ds -> Left $ "[ERROR (Parser)]: Se encontraron identificadores duplicados \
+                  \en el lado izquierdo de una asignación\n"
+                  ++ retab (intercalate "\n" (map idInfo ds))
+
+-- |Agregamos lambdas de una lista de identificadores a un cuerpo
+includeLambdas :: Lambda -> [Id] -> Lambda
+includeLambdas lam xs = aux lam $ reverse xs
+    where aux l [] = l
+          aux l (v:vs) = aux (LAbs v l) vs
 
 -- |Divide una cadena en dos donde se lee el primer token de definición (=).
 --  Da un error si cualquiera de los lados es vacío o no hay tal token.

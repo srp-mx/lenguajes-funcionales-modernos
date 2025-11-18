@@ -31,7 +31,8 @@ de combinadores SKI con cadenas. Éstos son:
 
 * `ski`: El cálculo SKI
 * `lambda`: El cálculo lambda
-* `subs`: El cálculo lambda con expresiones nombradas a nivel global
+* `subs`: El cálculo lambda con expresiones nombradas a nivel global,
+          posiblemente con argumentos
 
 Los modos disponibles son:
 
@@ -71,7 +72,7 @@ Los modos disponibles son:
 
 ```
 <Programa> ::= <Declaracion> { ; { ; }* <Declaracion> }* { ; }*
-<Declaracion> ::= <Identificador> = <Expresion>
+<Declaracion> ::= <Identificador> { <Identificador> }* = <Expresion>
 
 <Expresion> ::= <Identificador>
              |  <String>
