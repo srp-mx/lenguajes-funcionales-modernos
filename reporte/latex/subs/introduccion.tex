@@ -8,7 +8,7 @@ de programación, uno de los más comunes es la clasificación de acuerdo
 al paradigma al que pertenecen. Esta permite agrupar los lenguajes
 en dos grandes categorías: los lenguajes de programación imperativos y
 los lenguajes de programación declarativos \cite{karla-manu-notas1-2021}.
-Si bien ambas tienen sus propias subcategorías, para el
+Si bien, ambas tienen sus propias subcategorías, para el
 desarrollo de este trabajo nos enfocamos en la subcategoría \textit{funcional}
 del paradigma declarativo.
 
@@ -19,35 +19,37 @@ del enfoque imperativo), declaren expresiones que reflejen el resultado que
 se busca obtener (el \textit{qué}) \cite{rahul-adam-declarative-2024}.
 Sin embargo, otras características que los diferencian son: la recursión como
 principal estructura de control y generalmente la ausencia de operaciones
-como la asignación que pueden provocar \textit{efectos secundarios}
+como la asignación, las cuales pueden dar lugar a \textit{efectos secundarios}
 \cite{karla-manu-notas1-2021}\cite[p.~7]{rinus-marko-1993}.
 
 En particular en el enfoque \textit{funcional} las expresiones
 declaradas constituyen \textit{funciones} cuyo resultado, al ser aplicadas,
 únicamente depende del valor de sus argumentos, permitiendo
 que las mismas expresiones puedan ser utilizadas bajo distintos
-contextos o \textit{estados}, asegurando la consistencia del resultado
-respecto a los argumentos \cite[p.~7]{rinus-marko-1993}
+contextos o \textit{estados}. De manera que se asegura la consistencia
+del resultado respecto a los argumentos \cite[p.~7]{rinus-marko-1993}
 \cite{rahul-adam-declarative-2024}.
 
-Un punto que resulta de gran interés en los lenguajes de programación
-funcionales, es que están fuertemente basados en modelos matemáticos, siendo
-el \textit{cálculo lambda} el principal \cite[p.~9]{rinus-marko-1993} y
-campos de estudio como la \textit{teoría de categorías}
-\cite{karla-manu-notas1-2021}. Dado que esas bases, permiten trasladar a
-los programas propiedades como la \textit{transparencia referencial}, que
-a su vez dan lugar a conceptos como el \textit{razonamiento ecuacional}
-los cuales tienen un impacto positivo para su razonamiento y
-análisis \cite[p.~360]{paul-fpl-1989}.
+Un punto que resulta de gran interés en este paradigma de los lenguajes de
+programación es su sólida fundamentación en modelos matemáticos, entre los
+cuales el \textit{cálculo lambda} constituye el principal
+\cite[p.~9]{rinus-marko-1993}, junto con otros marcos teóricos
+como la \textit{teoría de categorías} \cite{karla-manu-notas1-2021}.
+Gracias a estas bases es posible trasladar a los programas propiedades
+como la \textit{transparencia referencial}, que a su vez permiten
+emplear técnicas como el \textit{razonamiento ecuacional},
+herramientas resultan fundamentales para facilitar el análisis y la
+comprensión formal de los programas \cite[p.~360]{paul-fpl-1989}.
 
-Ya mencionamos que las funciones que conforman los programas escritos
-usando lenguajes funcionales pueden ser \textit{aplicadas} a sus argumentos,
-esto es otro ejemplo del fundamento matemático que rige a este paradigma ya que
-con ello nos referimos a la forma en la que se evalúan las expresiones de los
-programas, la cual consiste en realizar una serie de reducciones a
-representaciones equivalentes, hasta llegar a la más sencilla
-\cite[p.~4]{rinus-marko-1993}, esquema que claramente se deriva de
-la $\beta$-reducción y la \textit{forma canónica} de las expresiones lambda.
+Ya mencionamos que, en los lenguajes de programación funcional,
+las funciones pueden aplicarse directamente a sus argumentos.
+Esto también refleja claramente el fundamento matemático que rige a
+este paradigma, pues describe la forma en que se deben evaluar las
+expresiones de un programa. Dicho proceso consiste en realizar una
+serie de reducciones hacia representaciones equivalentes, hasta
+obtener la más simple \cite[p.~4]{rinus-marko-1993}.
+Este esquema se deriva directamente de la $\beta$-reducción y de
+la noción de \textit{forma normal} en las expresiones lambda.
 
 Algunas de las características más destacables que
 incorporan los lenguajes funcionales modernos son:
@@ -71,24 +73,26 @@ incorporan los lenguajes funcionales modernos son:
 
   Debido al esquema de evaluación que sigue la aplicación de funciones,
   es posible que el orden en el que se realizan las sustituciones genere
-  cómputo repetido, afectando así el tiempo empleado. Por ello, los
-  lenguajes modernos incorporan la evaluación perezosa, pues conlleva
-  no reducir las expresiones hasta que sea estrictamente necesario
+  cómputo repetido, afectando así el tiempo empleado en la ejecución de un
+  programa. Por ello, los lenguajes modernos incorporan la evaluación
+  perezosa, como una forma de posponer la reducción de las expresiones
+  hasta que sea estrictamente necesario
   \cite[p.~142]{richard-philip-introflp-1998}.
   
-  Es importante destacar que esta propiedad
-  es muy especial debido a que no puede coexistir fácilmente con los
-  \textit{efectos secundarios}. Si bien esto no impide su incorporación en
-  otros paradigmas, sí la vuelve poco viable por la relevancia que el
-  contexto juega en la ejecución \cite[p.~9]{john-whyfpl-1990}.
+  Es importante destacar que esta propiedad no puede coexistir tan
+  naturalmente con los \textit{efectos secundarios} presentes en otros
+  paradigmas, debido a la relevancia que el contexto juega en la
+  evaluación \cite[p.~9]{john-whyfpl-1990}, motivo que si bien no
+  impide su incorporación en otros enfoques, sí la vuelve poco viable.
 
   Un uso interesante de esta propiedad
   es detallado en \cite[p.~9]{john-whyfpl-1990}, pues es posible
   aprovecharla para coordinar la ejecución de dos programas en el
-  que uno consume resultados del segundo sin la necesidad de que este
-  segundo programa sea un programa que siempre termine, dando paso
-  al uso de estructuras de datos infinitas \cite[p.~385]{paul-fpl-1989}.
-
+  que el primero consume resultados del segundo, sin la necesidad de que este
+  segundo sea un programa que siempre termine. Esto porque
+  al no tener que reducir cada cálculo al instante (\textit{evaluación
+    estricta o ansiosa}), se da lugar al uso de estructuras de datos
+  infinitas \cite[p.~385]{paul-fpl-1989}.
 \end{itemize}
 
 Si bien este tipo de lenguajes proveen ventajas, tales como: disminución
@@ -99,10 +103,14 @@ la disminución de la eficiencia y la idoneidad para aplicaciones de
 naturaleza imperativa \cite[p.~10]{rinus-marko-1993}.
 
 Es esta primera desventaja la principal motivación de esta investigación, ya que
-el objetivo es recopilar algunas de las técnicas utilizadas por los
-compiladores de los \textit{lenguajes de programación funcionales modernos}
-para transformar los programas (manteniendo su propósito original) para
-retener eficiencia tanto en tiempo como en espacio, pues puede verse
-afectada por ejemplo, por la ausencia de actualizaciones o el costo de llamadas
-a funciones \cite[p.~10]{rinus-marko-1993}.
+el objetivo es abordar algunas de las técnicas que emplean los compiladores
+de los \textit{lenguajes de programación funcionales modernos}
+para transformar los programas con el fin de retener eficiencia.
+
+Según \cite[p.~10]{rinus-marko-1993} la eficicencia de los programas
+funcionales se ve afectada principalmente porque las arquitecturas
+no están diseñadas para realizar este tipo de cómputo, ya sea por
+la falta de actualizaciones destructivas, que si pueden realizarse
+mediante asignaciones, o bien por que el costo de llamadas
+a funciones es muy alto.
 \end{document}
