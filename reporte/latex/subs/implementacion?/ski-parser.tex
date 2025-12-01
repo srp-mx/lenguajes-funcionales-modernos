@@ -1,0 +1,57 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+Este componente define el funcionamiento de un analizador sintáctico para el
+lenguaje $SKI$. Para se especifican las siguientes funciones:
+
+\begin{itemize}
+\item \boldit{parserInfo}: Permite obtener la información que identifica al
+  analizador sintáctico, concretamente su nombre.
+
+\item \boldit{parser}: Ejecuta el analizador léxico del lenguaje y
+  analiza su salida para reportar un error léxico o bien, para iniciar el
+  análisis sintáctico mediante la construcción del árbol de sintáxis
+  abstracta.
+
+\item \boldit{parseTok}: Dada una lista de tokens, la expresión
+  construido hasta el momento y la profundidad de parentizado
+  esta función recorre la lista de tokens y uno a uno hace lo siguiente.
+  
+  Si apenas se va a construir la primera expresión ya sea del programa o
+  dentro de un paréntesis:
+  \begin{itemize}
+  \item Si es alguno de los combinadores ($S$, $K$ o $I$), construye el
+    combinador mediante el constructor de \textit{Expr} respectivo y
+    aplica recursión con el resto de la lista de tokens.
+    
+  \item Si es una cadena aplica \textit{parseStr} pues es necesario
+    extraer la cadena sin las secuencias de escape y luego contruirla
+    mediante el constructor \textit{Str} del tipo \textit{Expr}. Después,
+    aplica recursión con el resto de la lista de tokens.
+
+  \item Si es un paréntesis que abre, se revisa que haya algo después,
+    y se aplica recursión con el resto de tokens y con un
+    nivel más de profundidad.
+
+  \item Si es un paréntesis que cierra, es un error.
+  \end{itemize}
+
+  Si ya se construyó alguna expresión y lo que sigue en la lista:
+  \begin{itemize}
+  \item Es alguno de los combinadores ($S$, $K$ o $I$) o una cadena,
+    se construye una aplicación  en la que la expresión construida
+    previamente es la función y el nuevo combinador, o bien,
+    la cadena extraída mediante la función \textit{parseStr}
+    es el argumento. Esta aplicación es usada para la
+    recursión con el resto de la lista de tokens.
+
+  \item Si es un paréntesis que abre, se revisa que haya algo después,
+    y se aplica recursión con el resto de tokens y con un
+    nivel más de profundidad.
+
+  \item Si es un paréntesis que cierra, es un error.
+  \end{itemize}
+\end{itemize}
+
+\end{document}

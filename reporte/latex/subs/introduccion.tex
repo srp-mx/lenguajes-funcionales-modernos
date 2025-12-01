@@ -3,42 +3,106 @@
 
 \begin{document}
 
-%% TODO: Esto es del proyecto anterior
+\PARstart{E}xisten distintos criterios de clasificación para los lenguajes
+de programación, uno de los más comunes es la clasificación de acuerdo
+al paradigma al que pertenecen. Esta permite agrupar los lenguajes
+en dos grandes categorías: los lenguajes de programación imperativos y
+los lenguajes de programación declarativos \cite{karla-manu-notas1-2021}.
+Si bien ambas tienen sus propias subcategorías, para el
+desarrollo de este trabajo nos enfocamos en la subcategoría \textit{funcional}
+del paradigma declarativo.
 
-\PARstart{L}os lenguajes de programación constituyen especificaciones
-mediante las cuales los programadores pueden definir secuencias de tareas
-a ejecutar por una computadora, llamadas programas, comúnmente
-haciendo uso de un lenguaje más cercano al entendimiento humano. 
-Por ello, se requiere que los programas pasen por un proceso de traducción
-que permita obtener una representación entendible y ejecutable por la máquina.
+Es común mencionar que los lenguajes del paradigma \textit{declarativo}
+requieren que los programadores en lugar de especificar los pasos a
+seguir para obtener cierto resultado esperado (el ‘cómo’ característico
+del enfoque imperativo), declaren expresiones que reflejen el resultado que
+se busca obtener (el \textit{qué}) \cite{rahul-adam-declarative-2024}.
+Sin embargo, otras características que los diferencian son: la recursión como
+principal estructura de control y generalmente la ausencia de operaciones
+como la asignación que pueden provocar \textit{efectos secundarios}
+\cite{karla-manu-notas1-2021}\cite[p.~7]{rinus-marko-1993}.
 
-Llamamos \textbf{compilador} al software encargado de realizar
-esta traducción, compuesta por distintas fases que permiten comprender
-la estructura del \textbf{programa fuente} y transformarla sin dejar de
-asegurar que la nueva representación, el \textbf{programa objeto},
-sea correcta, eficiente y que conserve su significado original. 
+En particular en el enfoque \textit{funcional} las expresiones
+declaradas constituyen \textit{funciones} cuyo resultado, al ser aplicadas,
+únicamente depende del valor de sus argumentos, permitiendo
+que las mismas expresiones puedan ser utilizadas bajo distintos
+contextos o \textit{estados}, asegurando la consistencia del resultado
+respecto a los argumentos \cite[p.~7]{rinus-marko-1993}
+\cite{rahul-adam-declarative-2024}.
 
-Generalmente, este proceso se divide en dos grandes fases: la fase de
-\textit{análisis} y la fase de \textit{síntesis}. La fase de análisis
-se encarga de procesar el programa fuente para asegurar su correctitud
-y definir de manera unívoca su estructura lógica mediante una
-\textbf{representación intermedia}; por otro lado, la fase de síntesis
-utiliza dicha representación para generar el programa objeto equivalente.
+Un punto que resulta de gran interés en los lenguajes de programación
+funcionales, es que están fuertemente basados en modelos matemáticos, siendo
+el \textit{cálculo lambda} el principal \cite[p.~9]{rinus-marko-1993} y
+campos de estudio como la \textit{teoría de categorías}
+\cite{karla-manu-notas1-2021}. Dado que esas bases, permiten trasladar a
+los programas propiedades como la \textit{transparencia referencial}, que
+a su vez dan lugar a conceptos como el \textit{razonamiento ecuacional}
+los cuales tienen un impacto positivo para su razonamiento y
+análisis \cite[p.~360]{paul-fpl-1989}.
 
-La fase de análisis está compuesta por tres etapas: 
-\textit{análisis léxico}, \textit{análisis sintáctico} y 
-\textit{análisis semántico}, cada una diseñada para abordar un nivel 
-específico de la comprensión del programa fuente.
+Ya mencionamos que las funciones que conforman los programas escritos
+usando lenguajes funcionales pueden ser \textit{aplicadas} a sus argumentos,
+esto es otro ejemplo del fundamento matemático que rige a este paradigma ya que
+con ello nos referimos a la forma en la que se evalúan las expresiones de los
+programas, la cual consiste en realizar una serie de reducciones a
+representaciones equivalentes, hasta llegar a la más sencilla
+\cite[p.~4]{rinus-marko-1993}, esquema que claramente se deriva de
+la $\beta$-reducción y la \textit{forma canónica} de las expresiones lambda.
 
-En este proyecto nos centraremos en la etapa del 
-\textbf{análisis léxico}, cuyo objetivo es reconocer los \textbf{componentes
-léxicos} o \textit{tokens} que constituyen el programa fuente. 
-Para ello, implementaremos en \textit{Haskell} un analizador léxico
-construido desde cero, aplicando los principios teóricos y algoritmos
-de los \textbf{autómatas finitos} y \textbf{lenguajes formales}.
-Dicha implementación busca no sólo validar la teoría, sino también
-fortalecer la comprensión práctica de los procesos de traducción
-en compiladores.
+Algunas de las características más destacables que
+incorporan los lenguajes funcionales modernos son:
+\begin{itemize}
+\item \boldit{Funciones de orden superior}
 
+  Las funciones son tratadas como \textit{ciudadanos de primer nivel},
+  esto quiere decir que pueden ser almacenadas en estructuras de datos,
+  pasadas como argumentos de otras funciones y regresadas como resultado
+  de alguna aplicación, como cualquier otro valor común
+  (enteros, cadenas y otros) \cite[p.~382]{paul-fpl-1989}.
+  Esta propiedad da la posibilidad de crear nuevas funciones como
+  una combinación de otras ya definidas \cite[p.~8]{john-whyfpl-1990}.
+
+  También, muchos lenguajes modernos además de permitir definir
+  funciones como \textit{ecuaciones}, permiten su creación como
+  \textit{abstracciones lambda}, eliminando la necesidad de un nombre
+  \cite[p.~382]{paul-fpl-1989}.
+  
+\item \boldit{Evaluación perezosa}
+
+  Debido al esquema de evaluación que sigue la aplicación de funciones,
+  es posible que el orden en el que se realizan las sustituciones genere
+  cómputo repetido, afectando así el tiempo empleado. Por ello, los
+  lenguajes modernos incorporan la evaluación perezosa, pues conlleva
+  no reducir las expresiones hasta que sea estrictamente necesario
+  \cite[p.~142]{richard-philip-introflp-1998}.
+  
+  Es importante destacar que esta propiedad
+  es muy especial debido a que no puede coexistir fácilmente con los
+  \textit{efectos secundarios}. Si bien esto no impide su incorporación en
+  otros paradigmas, sí la vuelve poco viable por la relevancia que el
+  contexto juega en la ejecución \cite[p.~9]{john-whyfpl-1990}.
+
+  Un uso interesante de esta propiedad
+  es detallado en \cite[p.~9]{john-whyfpl-1990}, pues es posible
+  aprovecharla para coordinar la ejecución de dos programas en el
+  que uno consume resultados del segundo sin la necesidad de que este
+  segundo programa sea un programa que siempre termine, dando paso
+  al uso de estructuras de datos infinitas \cite[p.~385]{paul-fpl-1989}.
+
+\end{itemize}
+
+Si bien este tipo de lenguajes proveen ventajas, tales como: disminución
+de fuentes de \textit{bugs}, independencia al contexto, amplia expresividad
+que deriva en código más breve y facilidad de modularidad. Existen dos
+grandes desventajas por las que no son el tipo de lenguaje más utilizado:
+la disminución de la eficiencia y la idoneidad para aplicaciones de
+naturaleza imperativa \cite[p.~10]{rinus-marko-1993}.
+
+Es esta primera desventaja la principal motivación de esta investigación, ya que
+el objetivo es recopilar algunas de las técnicas utilizadas por los
+compiladores de los \textit{lenguajes de programación funcionales modernos}
+para transformar los programas (manteniendo su propósito original) para
+retener eficiencia tanto en tiempo como en espacio, pues puede verse
+afectada por ejemplo, por la ausencia de actualizaciones o el costo de llamadas
+a funciones \cite[p.~10]{rinus-marko-1993}.
 \end{document}
-
