@@ -77,7 +77,12 @@ incorporan los lenguajes funcionales modernos son:
   programa. Por ello, los lenguajes modernos incorporan la evaluación
   perezosa, como una forma de posponer la reducción de las expresiones
   hasta que sea estrictamente necesario
-  \cite[p.~142]{richard-philip-introflp-1998}.
+  \cite[p.~142]{richard-philip-introflp-1998}. Más adelante será necesario
+  notar que este tipo de evaluación, además requiere que su implementación
+  permita asegurar que las expresiones sean evaluadas un sola vez y en caso
+  de volver a aparecer permitir la reutilización del valor ya calculado
+  \cite[p.~194]{peytonjones1987the} para contribuir en la mejora del
+  tiempo de ejecución.
   
   Es importante destacar que esta propiedad no puede coexistir tan
   naturalmente con los \textit{efectos secundarios} presentes en otros
