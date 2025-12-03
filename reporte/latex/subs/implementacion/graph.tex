@@ -1,0 +1,52 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+Este módulo define una gráfica dirigida como una lista de vértices y una
+función de adyacencia que dado un vértice $a$, regresa un conjunto
+(HashSet) de vértices adyacentes.
+
+Además, establece las siguientes funciones para manipular gráficas dirigidas:
+\begin{itemize}
+\item \boldit{stronglyConnected}: Dada una gráfica y una lista
+  de vértices devuelve el conjunto de los vértices que son
+  alcanzables a partir del conjunto inicial. Para ello realiza un recorrido
+  DFS.
+  
+\item \boldit{converse}: A partir de una gráfica dirigida permite
+  construir la gráfica dirigida con el mismo conjunto de vértices
+  pero con un conjunto de flechas en el que se conservan las relaciones
+  de la original pero con sentido contrario.
+
+\item \boldit{acyclicSort}: Asumiendo que la gráfica de entrada es acíclica,
+  se realiza un recorrido DFS y cada vértice se inserta en la lista de
+  salida \textbf{sólo después de haber procesado recursivamente todos sus vecinos}.
+  Esto produce un ordenamiento topológico de los vértices, sin duplicados.
+  
+\item \boldit{acyclicOrder}: Se basa en \textit{acyclicSort} para ordenar
+  los vértices de la gráfica y les asigna un índice que marca
+  su posición en el orden topológico.
+  
+\item \boldit{subdfs}: Es una función auxiliar que hace DFS a partir de un
+  vértice $v$ y devuelve una tupla cuyo primer elemento es el conjunto de
+  vértices alcanzados con $v$ y el conjunto de los vértices vistos inicialmente
+  más los que se vieron durante el DFS realizado.
+  
+\item \boldit{stronglyConnectedComponents}: Regresa una lista con las componentes conexas
+  de la gráfica dirigida. Para ello, ordena los vértices con \textit{acyclicSort} y por
+  cada uno si no ha sido visto hace DFS en la gráfica con las flechas invertidas,
+  recuperando en cada aplicación el conjunto de vértices descubierto.
+  Es una implementación del algoritmo de Kosaraju
+  \parencite[p.~617]{cormen2009introduction} para componentes fuertemente
+  conexas.
+  
+\item \boldit{verticesInCycles}: Dada una gráfica dirigida permite encontrar los
+  vértices que están dentro de un ciclo dirigido o bien, que tienen un lazo.
+  
+  Para ello, se obtienen las componentes conexas de la gráfica y se revisa: Si
+  solo constan de un elemento se revisa si tienen un lazo, si constan de más
+  vértices entonces dichos vértices están en un ciclo pues de no ser así no
+  sería posible alcanzar a alguno de los vértices desde otro, por lo que no
+  sería una componente conexa.
+\end{itemize}
+\end{document}
