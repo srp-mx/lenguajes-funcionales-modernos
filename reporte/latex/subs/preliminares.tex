@@ -7,10 +7,25 @@ En esta sección se presentan las definiciones y convenciones que se emplearán 
 lo largo del trabajo. El objetivo es establecer un marco común que permita la
 formulación rigurosa de los resultados posteriores.
 \begin{itemize}
-    \item \textbf{Términos Lambda}
-    \item \textbf{Gráfica}
-    \item \textbf{DAG}
-    \item \textbf{Índices de Brujin}
+    \item \textbf{Términos Lambda}: Decimos que los Términos Lambda son palabras que se definen en el siguiente alfabeto\parencite{The-Lambda-Calculus-its-Syntax-and-Semantics}:
+    \begin{itemize}
+        \item Variables: $v_0,v_1,\cdots$
+        \item Abstractor: $\Lambda$
+        \item Parentesis: $(.)$
+    \end{itemize}
+    Utilizamos las siguientes reglas para definir al conjunto de $\lambda$-Terminos de manera inductiva\parencite{The-Lambda-Calculus-its-Syntax-and-Semantics}:
+    \begin{itemize}
+        \item $x \in \Lambda$: Una variable $x$ es una cadena que representa a un parámetro, por si misma puede ser un término lambda.
+        \item $M \in \Lambda \Rightarrow (\lambda x M) \in \Lambda$: Una abstracción lambda del tipo $(\lambda x.M)$ es una función la cuál toma como entrada a la variable $x$ y regresa al cuerpo $M$ como resultado.\\
+        Decimos que esta definición de función es un término lambda.
+        \item $M,N \in \Lambda \Rightarrow (MN) \in \Lambda$: Una aplicación $(MN)$ es la aplicación de una función $M$ a un argumento $N$ dónde $M$ y $N$ son términos lamda.
+    \end{itemize}
+    \item \textbf{Gráfica}: Una gráfica es un conjunto de puntos conocidos como vértices, mientras que las lineas que conectan a estos puntos se conocen como aristas.\parencite{Introduction-To-Graph-Theory-Wilson}\\
+    Decimos que las aristas pueden representar relaciones entre los vértices que estas conectan.\parencite{Introduction-To-Graph-Theory-Wilson}
+    \item \textbf{DAG}: Una gráfica dirigida acíclica (DAG por sus siglas en inglés), es una gráfica en dónde cada una de sus aristas cuenta con una dirección en la que pueden ser recorridas.\parencite{Acyclic-Digraphs-Bang-Jensen-Gutin}
+    Sumado a esto decimos que esta gráfica es acíclica debido a que no cuenta con ciclos.\parencite{Acyclic-Digraphs-Bang-Jensen-Gutin}
+    \item \textbf{Índices de Brujin}: Son una técnica que nos permite escribir expresiones del cálculo lambda en dónde a cada variable se le reemplaza por un número que representa la cantidad
+    de niveles en la expresión que debemos de tomar ``saltar'' para encontrar a la variable con la que se encuentra ligada.\parencite{The-Lambda-Calculus-its-Syntax-and-Semantics}
     \item \textbf{Efectos secundarios} 
 \end{itemize}
 \end{document}
