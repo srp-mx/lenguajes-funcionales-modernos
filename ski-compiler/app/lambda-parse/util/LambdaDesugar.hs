@@ -11,6 +11,8 @@ import LambdaParser
 import qualified Data.HashSet as HS
 import Data.List(intercalate,sortBy)
 
+-- | TODO: Aplicar transformación lineal de Simon Peyton Jones Lambda->SKI+
+
 -- |Gramática mixta de combinadores y lambda para la traducción
 data LambdaSki
     = CombS
@@ -54,6 +56,7 @@ toSki (LSId x) = Left $ "[ERROR (Parser)]: Variable libre" ++ idInfo x
 toSki (LSAbs x body) = do
         sk <- removeFree x body
         toSki sk
+
 
 -- |Elimina la variable de una abstracción lambda, la cual es libre en su
 --  cuerpo, al aplicar combinadores.

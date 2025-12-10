@@ -205,23 +205,23 @@ prelude =
   , "});"
   , ""
   , "std::string pretty(const Value& v) {"
-  , "    if (v.isString()) return \"\\\"\" + v.asString() + \"\\\"\";"
+  , "    if (v.isString()) return v.asString();"
   , "    return \"<funcion>\";"
   , "}"
   ]
 
 -- |Genera la expresión en C++ a la cual se transforma la expresión SKI
-gen :: Expr' -> String
-gen SComb'      = "S"
-gen KComb'      = "K"
-gen IComb'      = "I"
-gen BComb'      = "B"
-gen CComb'      = "C"
-gen S'Comb'     = "Sp"
-gen C'Comb'     = "Cp"
-gen BsComb'     = "Bs"
-gen (Str' s)    = "Value(" ++ strLiteral s ++ ")"
-gen (EApp' l r) = "Apply(" ++ gen l ++ ", " ++ gen r ++ ")"
+gen :: Expr -> String
+gen SComb      = "S"
+gen KComb      = "K"
+gen IComb      = "I"
+gen BComb      = "B"
+gen CComb      = "C"
+gen S'Comb     = "Sp"
+gen C'Comb     = "Cp"
+gen BsComb     = "Bs"
+gen (Str s)   = "Value(" ++ strLiteral s ++ ")"
+gen (EApp l r) = "Apply(" ++ gen l ++ ", " ++ gen r ++ ")"
 
 -- |Escapa cadenas de SKI en un literal de C++
 strLiteral :: String -> String
