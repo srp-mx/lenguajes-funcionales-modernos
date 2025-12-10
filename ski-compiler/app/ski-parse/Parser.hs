@@ -85,7 +85,7 @@ tokInfo t = " [leído '" ++ lcStr (tkCat t) ++ "' en: " ++ pos ++ "]"
 -- |Extrae la cadena del código fuente y aplica escapes y demás para que sea
 --  la cadena que representa el código fuente.
 parseStr :: String -> Ski
-parseStr = Strn . aux []
+parseStr = Strn . (aux []) . removePad
     where aux acc [] = reverse acc
           aux acc ('\\':'\\':xs) = aux ('\\':acc) xs
           aux acc ('\\':'"':xs) = aux ('"':acc) xs

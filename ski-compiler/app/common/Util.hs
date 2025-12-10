@@ -2,6 +2,7 @@ module Util(
     retab,
     pullOutError,
     dups,
+    cleanPad,
 ) where
 
 import Data.List(intercalate)
@@ -28,3 +29,11 @@ pullOutError = aux [] []
 dups :: (Eq a, Hashable a) => [a] -> [a]
 dups xs = HM.keys $ HM.filter (> (1::Int)) counts
     where counts = HM.fromListWith (+) [(x,1) | x <- xs]
+
+-- |Elimina un caracter por extremo de la cadena
+cleanPad :: String -> String
+cleanPad [] = []
+cleanPad (_:xs) =
+    case reverse xs of
+        [] -> []
+        (_:ys) -> reverse ys

@@ -115,7 +115,7 @@ expectToken (t:ts) ex l
 -- |Extrae la cadena del código fuente y aplica escapes y demás para que sea
 --  la cadena que representa el código fuente.
 parseStr :: String -> Lambda
-parseStr = LStr . aux []
+parseStr = LStr . (aux []) . cleanPad
     where aux acc [] = reverse acc
           aux acc ('\\':'\\':xs) = aux ('\\':acc) xs
           aux acc ('\\':'"':xs) = aux ('"':acc) xs
