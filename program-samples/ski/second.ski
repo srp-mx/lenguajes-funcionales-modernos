@@ -1,0 +1,13 @@
+// Extensionalmente equivalente a F x y = y
+
+S (K I) (K I)
+
+/*
+ * F = S (K I) (K I)
+ * F x y = S (K I) (K I) x y
+ *       = (K I x) (K I x) y
+ *       = I (K I x) y
+ *       = (K I x) y
+ *       = I y
+ *       = y
+ */
