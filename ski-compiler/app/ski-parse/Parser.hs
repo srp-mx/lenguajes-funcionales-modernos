@@ -6,6 +6,7 @@ module Parser(
 
 import Lexer
 import Expr
+import Util
 
 -- |Tipo Ski para el AST del lenguaje ski
 data Ski = S
@@ -85,7 +86,7 @@ tokInfo t = " [leído '" ++ lcStr (tkCat t) ++ "' en: " ++ pos ++ "]"
 -- |Extrae la cadena del código fuente y aplica escapes y demás para que sea
 --  la cadena que representa el código fuente.
 parseStr :: String -> Ski
-parseStr = Strn . (aux []) . removePad
+parseStr = Strn . (aux []) . cleanPad
     where aux acc [] = reverse acc
           aux acc ('\\':'\\':xs) = aux ('\\':acc) xs
           aux acc ('\\':'"':xs) = aux ('"':acc) xs
@@ -97,10 +98,3 @@ parserShow s =
     let aux (Left errMsg) = "ERROR\n\n" ++ errMsg
         aux (Right expr) = showTree expr
     in aux $ parser s
-
--- |Agrega un nivel de indentación a la cadena
-retab :: String -> String
-retab s = "    " ++ aux [] s
-    where aux acc [] = reverse acc
-          aux acc ('\n':xs) = aux ("    \n" ++ acc) xs
-          aux acc (x:xs) = aux (x:acc) xs

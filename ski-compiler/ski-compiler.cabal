@@ -32,14 +32,14 @@ executable lambda-compiler-strict
     import:           common-settings
     main-is:          Main.hs
     other-modules:    Lexer, Parser, LambdaParser, LambdaDesugar, Lambda,
-                      CodeGenerator, Expr, Util
+                      CodeGenerator, Expr, Util, Kiselyov
     hs-source-dirs:   app, app/lambda-parse, app/strict, app/lambda-parse/util
 
 executable subs-compiler-strict
     import:           common-settings
     main-is:          Main.hs
     other-modules:    Lexer, Parser, LambdaParser, LambdaDesugar, Lambda,
-                      CodeGenerator, Expr, Util, Graph
+                      CodeGenerator, Expr, Util, Graph, Kiselyov
     hs-source-dirs:   app, app/subs-parse, app/strict, app/lambda-parse/util
 
 executable ski-compiler-lazy
@@ -52,12 +52,12 @@ executable lambda-compiler-lazy
     import:           common-settings
     main-is:          Main.hs
     other-modules:    Lexer, Parser, LambdaParser, LambdaDesugar, Lambda,
-                      CodeGenerator, Expr, Util
+                      CodeGenerator, Expr, Util, Kiselyov
     hs-source-dirs:   app, app/lambda-parse, app/lazy, app/lambda-parse/util
 
 executable subs-compiler-lazy
     import:           common-settings
     main-is:          Main.hs
     other-modules:    Lexer, Parser, LambdaParser, LambdaDesugar, Lambda,
-                      CodeGenerator, Expr, Util, Graph
+                      CodeGenerator, Expr, Util, Graph, Kiselyov
     hs-source-dirs:   app, app/subs-parse, app/lazy, app/lambda-parse/util
