@@ -39,20 +39,37 @@ showTree = aux (0,[]) ""
         indent _ [] = ""
         indent _ bs = concatMap (\b -> if b then "│  " else "   ") (init bs)
 
+-- |Obtiene la longutid de una expresión
+exprLen :: Expr -> Int
+exprLen (EApp e1 e2) = exprLen e1 + exprLen e2
+exprLen _ = 1
+
 -- |Optimiza una expresión SKI+
 optimizeExpr :: Expr -> Expr
-optimizeExpr SComb = SComb
-optimizeExpr KComb = KComb
-optimizeExpr IComb = IComb
-optimizeExpr BComb = BComb
-optimizeExpr CComb = CComb
-optimizeExpr S'Comb = S'Comb
-optimizeExpr C'Comb = C'Comb
-optimizeExpr BsComb = BsComb
-optimizeExpr (Str s) = Str s
-optimizeExpr (EApp e1 e2) =
-    let e1' = optimizeExpr e1
-        rhs = optimizeExpr e2
+optimizeExpr e0 | origLen == minLen   = e0
+                | directLen == minLen = directOpt
+                | otherwise           = simplOpt
+                where origLen = exprLen e0
+                      directOpt = optimizeExpr' e0
+                      directLen = exprLen directOpt
+                      simplOpt = optimizeExpr' (simplExpr e0)
+                      simplLen = exprLen simplOpt
+                      minLen = min origLen (min directLen simplLen)
+
+-- |Optimiza una expresión SKI+ con el método de Peyton
+optimizeExpr' :: Expr -> Expr
+optimizeExpr' SComb = SComb
+optimizeExpr' KComb = KComb
+optimizeExpr' IComb = IComb
+optimizeExpr' BComb = BComb
+optimizeExpr' CComb = CComb
+optimizeExpr' S'Comb = S'Comb
+optimizeExpr' C'Comb = C'Comb
+optimizeExpr' BsComb = BsComb
+optimizeExpr' (Str s) = Str s
+optimizeExpr' (EApp e1 e2) =
+    let e1' = optimizeExpr' e1
+        rhs = optimizeExpr' e2
     in case e1' of
         (EApp SComb lhs) ->
             case (lhs,rhs) of
@@ -76,3 +93,52 @@ optimizeExpr (EApp e1 e2) =
                     EApp (EApp (EApp S'Comb p) q) r
                 _ -> EApp e1' rhs
         _ -> EApp e1' rhs
+
+-- |Simplifica la expresión en O(n) a únicamente S, K, I para que funcione
+--  mejor el algoritmo de optimización (posiblemente).
+simplExpr :: Expr -> Expr
+simplExpr SComb = SComb
+simplExpr KComb = KComb
+simplExpr IComb = IComb
+simplExpr (EApp e1 e2) = EApp (simplExpr e1) (simplExpr e2)
+simplExpr (Str s) = Str s
+simplExpr BComb = EApp (EApp SComb (EApp KComb SComb)) KComb -- B = S (S K) K
+simplExpr CComb = -- C = S (S (K (S (K S) K)) S) (K K)
+    EApp          -- C = { S ( { S (K (S (K S) K)) } S) } (K K)
+        (EApp
+          SComb
+          (EApp
+            (EApp SComb (EApp KComb (EApp (EApp SComb (EApp KComb SComb)) KComb)))
+            SComb))
+        (EApp KComb KComb)
+simplExpr S'Comb = -- S' = Psi = S (S (K S) (S (K K) I)) (K I)
+    EApp
+    (EApp SComb
+      (EApp
+        (EApp SComb (EApp KComb SComb))
+        (EApp (EApp SComb (EApp KComb KComb)) IComb)))
+    (EApp KComb IComb)
+simplExpr C'Comb = -- C' = S ( S ( S (K K) (S (K S) (S (K K) I)) ) (K I) ) ( K (K (S (K K) I)) )
+  EApp
+    (EApp SComb
+      (EApp
+        (EApp SComb
+          (EApp
+            (EApp SComb
+              (EApp KComb KComb))
+            (EApp
+              (EApp SComb (EApp KComb SComb))
+              (EApp
+                (EApp SComb (EApp KComb KComb))
+                IComb))))
+        (EApp KComb IComb)))
+    (EApp KComb (EApp KComb (EApp (EApp SComb (EApp KComb KComb)) IComb)))
+simplExpr BsComb = -- B* = S ( S (K K) (S (K S) (S (K K) I)) ) ( K (K (S (K K) I)) )
+  EApp
+    (EApp SComb
+      (EApp
+        (EApp SComb (EApp KComb KComb))
+        (EApp
+          (EApp SComb (EApp KComb SComb))
+          (EApp (EApp SComb (EApp KComb KComb)) IComb))))
+    (EApp KComb (EApp KComb (EApp (EApp SComb (EApp KComb KComb)) IComb)))
