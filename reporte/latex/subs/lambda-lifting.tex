@@ -2,4 +2,292 @@
 \usepackage{util/estilo}
 
 \begin{document}
+
+Dado que los lenguajes funcionales pueden interpretarse como una
+versión con azúcar sintáctica del cálculo lambda
+\cite[p.~9]{rinus-marko-1993}, el esquema de $\beta$-reducción se
+refleja directamente en la aplicación de funciones dentro de los
+programas funcionales. Así, al aplicar una función a un argumento,
+se genera una nueva \textit{instancia} o copia del cuerpo de la función en
+la que las apariciones, ahora libres tras eliminar la cabecera,
+del \textit{parámetro formal} (la variable que representa al argumento en
+la definición) son reemplazadas por dicho argumento.
+
+Este es un proceso costoso computacionalmente pues se requiere:
+buscar la expresión a reducir en la gráfica del programa,
+aplicar una serie de verificaciones para reemplazar únicamente el
+parámetro formal correspondiente al argumento y una buena
+cantidad de memoria para almacenar cada copia generada. Además,
+recordemos que es posible tener múltiples argumentos pero
+hasta este punto la $\beta$-reducción solo nos permite aplicar uno
+a uno.
+
+Por este motivo, surge la \textit{compilación} de las abstracciones lambda
+como una forma de aligerar su aplicación. La idea que sigue esta
+optimización, es permitir que el compilador sea capaz de ``adelantar'' parte de
+ese trabajo asociando al cuerpo de una función una \textbf{serie fija de
+instrucciones} que permitan dar lugar a la construcción de nuevas instancias
+\cite[p.~220]{peytonjones1987the}. Puede ocurrir que existan abstracciones
+lambda que al aplicarles la $\beta$-reducción de un argumento, generen nuevas
+abstracciones lambda con valores que dependen precisamente de la o las
+reducciones anteriores pero que además pueden ser aplicadas a otro argumento,
+lo que representa un problema para la asignación de una secuencia de
+instrucciones fija.
+
+Un ejemplo es $\lambda x.\lambda y.\lambda z. if\ x\ then\ y\ else\ z$,
+pues la reducción del primer argumento dará lugar a una nueva abstracción
+dependiente de $y$ y de $z$ en la que $x$ habrá sido sustituida por el argumento,
+comportamiento que se repite con el argumento para $y$ y no es hasta la
+aplicación del tercer argumento que la instancia del cuerpo de la función
+está completamente construido, listo para su evaluación.
+En consecuencia, este tipo de expresiones generan instancias intermedias
+del cuerpo de la función que podrían ahorrarse si realizáramos sustituciones
+simultáneamente de varios argumentos pues el resultado es el mismo
+\cite[p.~222]{peytonjones1987the}.
+
+Este tipo de abstracciones lambda que permiten la reducción simultánea
+se nombran como \textit{supercombinadores} y se definen en
+\cite[p.~223]{peytonjones1987the} como sigue:
+
+\defn{Supercombinador:} Un supercombinador, denotado con un identificador
+arbitrario antecedido por \$, de \textit{aridad}
+$n$ es una expresión de la forma $\lambda x_1.\lambda x_2.\cdots.\lambda x_n.E$
+donde $E$ no es una expresión lambda. Y que además, satisface las siguientes
+condiciones:
+\begin{itemize}
+\item \$S no tiene variables libres
+\item Cualquier abstracción lambda en su cuerpo es también un supercombinador
+\item $n \ge 0$, es decir, puede no contener expresiones lambda
+\end{itemize}    
+
+A la aplicación de un combinador la llamamos \textit{redex de supercombinador}
+y como resultado de su \textit{reducción} obtenemos una instancia del cuerpo
+del supercombinador pero con las ocurrencias de sus variables libres,
+sustituidas por los argumentos correspondientes. De esta forma una expresión
+que involucra un supercombinador y solo algunos de sus $n$ argumentos
+\textbf{no} son un \textit{redex de supercombinador}
+\cite[p.~224, p.~225]{peytonjones1987the}.
+
+
+Además, a los supercombinadores de aridad cero, los llamamos
+\textit{formas de aplicación constante} y son especiales porque no
+requieren compilar código para ellas ya que una sola instancia es suficiente
+para ser compartida \cite[p.~224]{peytonjones1987the}.
+
+Una vez visto el contexto que origina el proceso de
+\textit{lambda lifting} y su idea general, lo siguiente es revisar el
+algoritmo que permite a esta optimización convertir todas las
+expresiones lambda del programa en supercombinadores.
+
+\begin{algorithm}[H]
+\caption{lambda lifting}
+\begin{algorithmic}[1]
+\State \textbf{Hasta que} no queden más abstracciones lambda:
+\begin{enumerate}
+\item Elegir cualquier abstracción lambda que \textbf{no tenga abstracciones
+  lambda internas} en su cuerpo.
+\item Extraer todas sus variables libres como parámetros adicionales.
+\item Asignar un nombre arbitrario a la abstracción lambda.
+\item Reemplazar la ocurrencia de la abstracción lambda por el nombre asignado,
+  aplicado a las variables libres.
+\item Generar su código de ejecución y registrarlo como una función global del
+  programa bajo el nombre asignado.
+\end{enumerate}
+\State \textbf{Fin}
+\end{algorithmic}
+\end{algorithm}
+
+
+Ya sabemos que las funciones definidas en un programa funcional
+son tratadas como cualquier otro valor y que esto brinda un
+marco de trabajo bastante flexible a la hora de construir
+nuevas funciones. Una particularidad que hay que notar,
+es que al momento de declarar funciones es posible definirlas
+localmente, es decir, dentro de otras declaraciones de funciones.
+Por ejemplo, en Haskell la siguiente expresión es una declaración válida.
+
+\begin{minted}[
+          fontsize=\small,
+          breaklines,
+          breakanywhere
+        ]{haskell}
+normalizarPositivos xs =
+  let positivos = filter (> 0) xs        
+      maximo    = maximum positivos
+      normalizar n = n / maximo           
+  in map normalizar positivos
+\end{minted}
+
+Y si la expresamos con una sintaxis más cercana al cálculo lambda
+podemos verla como:
+
+\begin{align*}
+\lambda xs.\;& \\
+&\bigl( \lambda positivos.\; \\
+&\quad \bigl( \lambda maximo.\; \\
+&\qquad \text{map}\, (\lambda n.\; (/\, n\, maximo))\, positivos \\
+&\quad \bigr)\; (\text{maximum}\, positivos) \\
+&\bigr)\; (\text{filter}\, (\lambda k.\; (>\, k\, 0))\, xs)
+\end{align*}
+
+Aplicaremos el algoritmo para ilustrar su funcionamiento.
+
+\begin{itemize}
+\item Comenzamos con $\lambda n.\; (/\, n\, maximo)$
+  \begin{itemize}
+  \item Extraemos la variable libre $maximo$ como un parámetro adicional
+    que llamaremos $m$ y obtenemos
+    $\lambda m.\; \lambda n.\; /\, n\, m$
+  \item Le asignamos el nombre $\$F1$
+  \item Reemplazamos la abstracción lambda por $\$F1$ aplicado a la
+    variable libre $maximo$.
+
+    \begin{align*}
+      \lambda xs.\;& \\
+      &\bigl( \lambda positivos.\; \\
+      &\quad \bigl( \lambda maximo.\; \\
+      &\qquad \text{map}\, (\$F1\; maximo)\, positivos \\
+      &\quad \bigr)\; (\text{maximum}\, positivos) \\
+      &\bigr)\; (\text{filter}\, (\lambda k.\; (>\, k\, 0))\; xs)
+    \end{align*}
+
+  \item Registramos su código con el nombre $\$F1$
+    \begin{center}
+      \begin{tabular}{|c|}
+        \hline
+        $\$F1\, m\, n \;=\; /\, n\, m$ \\ \hline
+      \end{tabular}
+    \end{center}
+  \end{itemize}
+
+\item Siguiendo con $\lambda k.\; (>\, k\, 0)$
+  \begin{itemize}
+  \item Como no hay variables libres el siguiente paso es
+    asignar el nombre $\$F2$
+  \item Reemplazamos la abstracción lambda por $\$F2$
+
+    \begin{align*}
+      \lambda xs.\;& \\
+      &\bigl( \lambda positivos.\; \\
+      &\quad \bigl( \lambda maximo.\; \\
+      &\qquad \text{map}\, (\$F1\; maximo)\, positivos \\
+      &\quad \bigr)\; (\text{maximum}\, positivos) \\
+      &\bigr)\; (\text{filter}\, \$F2\; xs)
+    \end{align*}
+
+  \item Registramos su código con el nombre $\$F2$
+    \begin{center}
+      \begin{tabular}{|c|}
+        \hline
+        $\$F1\, m\, n \;=\; /\, n\, m$ \\ \hline
+        $\$F2\, k \;=\; >\, k\, 0$ \\ \hline
+      \end{tabular}
+    \end{center}
+  \end{itemize}
+
+\item Al aplicar el algoritmo a
+  $\lambda maximo.\; \text{map}\, (\$F1\; maximo)\, positivos$
+  \begin{itemize}
+  \item Extraemos $positivos$ como un parámetro adicional
+    que llamaremos $p$ y obtenemos:
+
+    $\lambda p.\; \lambda maximo.\; \text{map}\, (\$F1\; maximo)\, p$
+
+  \item Le asignamos el nombre $F3$
+  \item Reemplazamos
+  \begin{align*}
+      \lambda xs.\;& \\
+      &\bigl( \lambda positivos.\; \\
+      &\quad \bigl( \$F3 \; positivos \bigr)\; (\text{maximum}\, positivos) \\
+      &\bigr)\; (\text{filter}\, \$F2\; xs)
+  \end{align*}
+
+  \item Registramos su código con el nombre $\$F3$
+    \begin{center}
+      \begin{tabular}{|c|}
+        \hline
+        $\$F1\, m\, n \;=\; /\, n\, m$ \\ \hline
+        $\$F2\, k \;=\; >\, k\, 0$ \\ \hline
+        $\$F3\, p\, maximo \;=\; \text{map}\, (\$F1\; maximo)\, p$ \\ \hline
+      \end{tabular}
+    \end{center}
+  \end{itemize}
+
+\item Ahora con
+  $\lambda positivos.\;
+       \bigl( \$F3 \; positivos \bigr)\; (\text{maximum}\, positivos)$
+  
+  \begin{itemize}
+  \item No hay variables libres, por lo que solo le asignamos $\$F4$ como
+    nombre y reemplazamos.
+  \begin{align*}
+      \lambda xs.\;\bigl( \$F4 \bigr)\; (\text{filter}\, \$F2\, xs)
+  \end{align*}
+
+  \item Registramos su código con el nombre $\$F3$
+    \begin{center}
+      \begin{tabular}{|c|}
+        \hline
+        $\$F1\, m\, n \;=\; /\, n\, m$ \\ \hline
+        $\$F2\, k \;=\; >\, k\, 0$ \\ \hline
+        $\$F3\, p\, maximo \;=\; \text{map}\, (\$F1\; maximo)\, p$ \\ \hline
+        $\$F4\, positivos \;=\; \bigl( \$F3 \; positivos \bigr)\; (\text{maximum}\, positivos)$ \\ \hline
+      \end{tabular}
+    \end{center}
+  \end{itemize}
+
+\item Por último aplicando el algoritmo a
+  $\lambda xs.\;\bigl( \$F4 \bigr)\; (\text{filter}\, \$F2\, xs)$ obtenemos:
+  $\$F5$ y la tabla final es:
+  \begin{center}
+      \begin{tabular}{|c|}
+        \hline
+        $\$F1\, m\, n \;=\; /\, n\, m$ \\ \hline
+        $\$F2\, k \;=\; >\, k\, 0$ \\ \hline
+        $\$F3\, p\, maximo \;=\; \text{map}\, (\$F1\; maximo)\, p$ \\ \hline
+        $\$F4\, positivos \;=\; \bigl( \$F3 \; positivos \bigr)\; (\text{maximum}\, positivos)$ \\ \hline
+        $\$F5\, xs\;=\; \bigl( \$F4 \bigr)\; (\text{filter}\, \$F2\, xs)$
+        \\ \hline
+      \end{tabular}
+    \end{center}
+\end{itemize}
+
+De esta forma al aplicar \texttt{normalizarPositivos} a la lista $[2,4,6]$
+tendríamos:
+\begin{center}
+  \begin{tabular}{|c|}
+    \hline
+    $\$F1\, m\, n \;=\; /\, n\, m$ \\ 
+    $\$F2\, k \;=\; >\, k\, 0$ \\
+    $\$F3\, p\, maximo \;=\; \text{map}\, (\$F1\; maximo)\, p$ \\
+    $\$F4\, positivos \;=\; \bigl( \$F3 \; positivos \bigr)\; (\text{maximum}\, positivos)$ \\
+    $\$F5\, xs\;=\; \bigl( \$F4 \bigr)\; (\text{filter}\, \$F2\, xs)$
+    \\ \hline
+    \$F5 [2,4,6]\\ \hline
+  \end{tabular}
+\end{center}
+
+Que se podría reducir como sigue:
+\begin{align*}
+  &\$F5 [2,4,6] \\
+  &\rightarrow \bigl( \$F4 \bigr)\; (\text{filter}\, \$F2\, [2,4,6])\\
+  &\rightarrow \bigl( \$F4 \bigr)\; (\text{filter}\,  (>\, k\, 0)\, [2,4,6])\\
+  &\rightarrow \bigl( \$F4 \bigr)\; [2,4,6]\\
+  %&\rightarrow \bigl( \bigl( \$F3 \; positivos \bigr)\; (\text{maximum}\, positivos) \bigr)\; [2,4,6]\\
+  &\rightarrow \bigl( \bigl( \$F3 \; [2,4,6] \bigr)\; (\text{maximum}\,  [2,4,6]) \bigr)\\
+  &\rightarrow \bigl( \$F3 \; [2,4,6]\; 6 \bigr)\\
+  &\rightarrow \bigl( \text{map}\, (\$F1\; 6)\, [2,4,6] \bigr)\\
+  &\rightarrow \bigl( \text{map}\, ( /\, n\, 6) \; [2,4,6] \bigr)\\
+  &\rightarrow [0.3333, 0.6667, 1.0]
+\end{align*}
+
+Así, el espacio de las instancias intermedias se reduce y se hacen sustituciones
+de forma simultánea sin perder información.
+
+Esta técnica también tiene un área de mejora importante y es que durante el
+algoritmo es posible generar parámetros redundantes que pueden ser eliminados
+y para ello es necesario contemplar aspectos como el orden en el que se
+definen los parámetros adicionales con base en su nivel de profundidad, lo
+que se puede hacer por ejemplo, con los índices de De Bruijn
+\cite[p.~230]{peytonjones1987the}.
 \end{document}
