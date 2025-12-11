@@ -39,37 +39,44 @@ showTree = aux (0,[]) ""
         indent _ [] = ""
         indent _ bs = concatMap (\b -> if b then "│  " else "   ") (init bs)
 
--- |Obtiene la longutid de una expresión
+-- |Obtiene la longitud de una expresión
 exprLen :: Expr -> Int
-exprLen (EApp e1 e2) = exprLen e1 + exprLen e2
+exprLen (EApp e1 e2) = 1 + exprLen e1 + exprLen e2
 exprLen _ = 1
 
--- |Optimiza una expresión SKI+
+-- |Optimiza al punto fijo en la longitud de la expresión SKI+
 optimizeExpr :: Expr -> Expr
-optimizeExpr e0 | origLen == minLen   = e0
-                | directLen == minLen = directOpt
-                | otherwise           = simplOpt
-                where origLen = exprLen e0
-                      directOpt = optimizeExpr' e0
-                      directLen = exprLen directOpt
-                      simplOpt = optimizeExpr' (simplExpr e0)
-                      simplLen = exprLen simplOpt
-                      minLen = min origLen (min directLen simplLen)
+optimizeExpr e = let e' = optimizeExprStep e
+                 in if exprLen e' < exprLen e
+                    then optimizeExpr e'
+                    else e
+
+-- |Realiza un paso de optimización de una expresión SKI+
+optimizeExprStep :: Expr -> Expr
+optimizeExprStep e0 | origLen == minLen   = e0
+                    | directLen == minLen = directOpt
+                    | otherwise           = simplOpt
+                    where origLen = exprLen e0
+                          directOpt = peytonOptimize e0
+                          directLen = exprLen directOpt
+                          simplOpt = peytonOptimize (simplExpr e0)
+                          simplLen = exprLen simplOpt
+                          minLen = min origLen (min directLen simplLen)
 
 -- |Optimiza una expresión SKI+ con el método de Peyton
-optimizeExpr' :: Expr -> Expr
-optimizeExpr' SComb = SComb
-optimizeExpr' KComb = KComb
-optimizeExpr' IComb = IComb
-optimizeExpr' BComb = BComb
-optimizeExpr' CComb = CComb
-optimizeExpr' S'Comb = S'Comb
-optimizeExpr' C'Comb = C'Comb
-optimizeExpr' BsComb = BsComb
-optimizeExpr' (Str s) = Str s
-optimizeExpr' (EApp e1 e2) =
-    let e1' = optimizeExpr' e1
-        rhs = optimizeExpr' e2
+peytonOptimize :: Expr -> Expr
+peytonOptimize SComb = SComb
+peytonOptimize KComb = KComb
+peytonOptimize IComb = IComb
+peytonOptimize BComb = BComb
+peytonOptimize CComb = CComb
+peytonOptimize S'Comb = S'Comb
+peytonOptimize C'Comb = C'Comb
+peytonOptimize BsComb = BsComb
+peytonOptimize (Str s) = Str s
+peytonOptimize (EApp e1 e2) =
+    let e1' = peytonOptimize e1
+        rhs = peytonOptimize e2
     in case e1' of
         (EApp SComb lhs) ->
             case (lhs,rhs) of
