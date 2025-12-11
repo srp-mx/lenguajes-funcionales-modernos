@@ -1,0 +1,44 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+Con el fin de poder obtener los archivos ejecutables de nuestros programas,
+decidimos implementar un módulo encargado de generar el programa equivalente
+en C++ para entonces aprovechar el compilador G++. Tenemos dos implementaciones
+de este proceso, una que lleva a cabo una
+evaluación estricta o ansiosa y otra que permite la evaluación perezosa pero
+ambas siguen una idea similar.
+
+La idea consiste en los siguientes puntos:
+\begin{itemize}
+\item Definir una estructura $Value$ en C++ que puede contener una cadena o una
+  función, 
+\item Función $Apply$ que dadas dos instancias $f$ y $x$ de tipo $Value$
+  permite aplicar el primero al segundo según sea el caso:
+  \begin{itemize}
+  \item Cadena y función $\rightarrow$ evalúa la función con la cadena vacía
+    como parámetro y si el resultado es una cadena, la concatena a la primera.
+    \item Cadena y cadena $\rightarrow$ concatena ambas cadenas.
+    \item Función y cualquier valor $\rightarrow$ aplica la función al valor.
+    \item Otro caso $\rightarrow$ ocurre un error.
+  \end{itemize}
+\item Implementar el comportamiento de los combinadores $S$, $K$, $I$, $B$, $C$
+  y algunas variantes $Bs$, $Cp$ y $Sp$.
+
+\item Gracias a estas definiciones lo que sigue es reemplazar las
+  expresiones del programa fuente a su definición en C++ que construimos
+  con anterioridad, valor que almacenamos en una variable
+  \textit{ProgramExpr}.
+
+\item Se define el método \textit{main} en el que se aplica el programa
+  a cada argumento de línea de comandos mediante la función \textit{Apply}
+  y se imprime el resultado.  
+\end{itemize}
+
+La diferencia con la versión de evaluación perezosa es que se incorpora una
+estructura \textit{Thunk} que no es más que una función cuyo tipo de retorno
+es \textit{Value} y que tiene un método \textit{force} el cual
+debe ser llamado para que la función se evalúe. Esta estructura se usa
+para definir que una función del lenguaje recibe un \textit{Thunk} lo que
+permite a las funciones decidir cuándo evaluar su argumento.
+\end{document}
