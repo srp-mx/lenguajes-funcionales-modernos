@@ -66,7 +66,7 @@ función que realice la siguiente operación\cite{clase-combinadores-calculo}:
 Esto se puede lograr utilizando al combinador $K$ junto con otro combinador que se analiza más adelante, el combinador $S$:
 \begin{center}
     $V = K$\\
-    $F = SK$
+    $F = S \, K$
 \end{center}
 Por último, se tiene al combinador $S$, el cuál se le conoce como el combinador de distribución, este se encarga de distribuir un solo argumento a
 $2$ funciones, su regla es la siguiente:\cite{koopman1990architecture}
@@ -105,5 +105,45 @@ Decimos que por eso, los paréntesis en este tipo de expresiones nos ayudan a de
 de unas variables con otras cuando esto es necesario.\cite{clase-combinadores-calculo} Decimos que en
 ausencia de paréntisis, este sistema asocia a la izquierda.\cite{clase-combinadores-calculo}\\
 Una característica muy importante del cálculo SKI es que es capaz de representar a todos los programas 
-computables.\cite{koopman1990architecture} Es decir, este sistema de cálculo es Turing computable.
+computables.\cite{koopman1990architecture} Es decir, este sistema de cálculo es Turing computable.\\
+Por último, observemos como SKI maneja $3$ conceptos fundamentales que nos permiten ``programar'' en el:\cite{clase-combinadores-calculo}
+\begin{itemize}
+    \item \textbf{Recursión}\\
+        Notemos que la expresión $(S \, I \, I) \; (S \, I \, I)$ es una expresión que se puede reescribir a si misma. Pues: 
+        \begin{center}
+            $S \, I \, I \, x \rightarrow (I \, x) \, (I \, x) \rightarrow x \, (I \, x) \rightarrow x \, x$
+        \end{center}
+        Por lo que se puede definir una llamada a una función recursivamente definiendo a un $x$ como:
+        \begin{center}
+            $x = S (\, K \, f) \; (S (\, I \, I))$
+        \end{center}
+        De esta manera se puede expandir de la siguiente forma:
+        \begin{center}
+            $S \, I \, I \, x \rightarrow x x \rightarrow S (\, K \, f) \; (S (\, I \, I)) x \rightarrow ((K \, f) \, x) \; ((S \, I \, I) \, x) 
+            \rightarrow ((K \, f) \, x) \; (x \, x) \rightarrow f \, (x \,x) \rightarrow f(f(x,x))$
+        \end{center}
+    \item \textbf{Condicionales}\\
+        Para lograr tener un comportamiento de ramificación, es necesario contar con booleanos. Es por eso que podemos tomar la definición anterior 
+        de booleanos, es decir:
+        \begin{center}
+           $V = K$\\
+           $F = S \, K$ 
+        \end{center}
+        Para definir las operaciones sobre booleanos tenemos que:
+        \begin{center}
+            \begin{itemize}
+                \item $not \, B = B \, F \, V$ en dónde $B$ es un booleano
+                \item $B_1 \, or \, B_2 = B_1 \, V \, B_2$ en dónde $B$ es un booleano
+                \item $B_1 \, and \, B_2 = B_1 \, B_2 \, F = B_1 \, B_2 \, (S \, K)$ en dónde $B$ es un booleano
+            \end{itemize}
+        \end{center}
+        Ahora veamos que se puede definir a un condicional de la siguiente manera:
+        \begin{center}
+            $if \, B \, then \, X \, else \, Y = B \, X \, Y$
+        \end{center}
+    \item \textbf{Estructuras de datos}\\
+        Observemos que como se realizó con las definiciones de los booleanos y las estructuras de control, podemos escribir combinadores para representar
+        estructuras de datos, funciones, etc.\\
+        Por ejemplo, para definir a la función $swap \,(x \, y) = y \, x$, tenemos que podemos usar al siguiente combinador $swap \, = S \, (K \, (S \, I)) (S \, (K \, K) \, I)$
+\end{itemize}
 \end{document}
