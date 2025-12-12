@@ -4,7 +4,90 @@
 %% TODO: Esto es solamente de relleno para evaluar la tipografía
 
 \begin{document}
-
-
-
+Como se pudo observar en la sección anterior, SKI esa un sistema de cálculo simple, pues en su base solo cuenta con $3$ reglas, 
+poderoso, ya que es Turing completo y eficiente, pues debido a que no cuenta con variables no ligadas, no es necesario tener un 
+ambiente en dónde se deban de guardar.\\
+Gracias a su simplicidad, tenemos que el comportamiento de estos combinadores, se puede escribir en un lenguaje de programación
+que nos permita traducir código SKI a un lenguaje como C++. De tal manera que podemos ejecutar código escrito en C++, concepto explorado
+más adelante en este trabajo.\\
+Un problema con el que se tiene al intentar escribir programas más complejos en SKI, es que su sintaxis se vuelve muy larga y difícil de
+escribir, en particular, al intentar introducir múltiples argumentos en combinador.\\
+Tomando en cuenta sus desventajas y ventajas, podemos observar que SKI funciona como un buen candidato para un lenguaje intermedio, pues 
+una computadora no necesita preocuparse por la facilidad de lectura de un programa y tiene mucho que ganar de un sistema de cálculo eficiente.\\
+Entonces es necesario pensar en otra forma de expresar programas que sea de lectura más fácil para humanos y que tenga una traducción no tan difícil
+a SKI.\\
+Resulta que tal sistema existe y es el cálculo lambda. Esto debido a que existe un algoritmo de transformación directo de cálculo lambda a SKI.\cite{peytonjones1987the} Esta 
+transformación, manteniendo el espíritu de SKI, cuenta con $3$ simples reglas para cada uno de sus combinadores, las cuáles son:\cite{peytonjones1987the}
+\begin{itemize}
+    \item Para el combinador $S$\\
+    Supongamos una abstracción lambda que tiene la siguiente forma:
+    \begin{center}
+        $(\lambda x.e_1 \, e_2)$
+    \end{center}
+    en dónde $e_1$ y $e_2$ son expresiones arbitrarias.\\
+    Notemos que el siguiente combinador SKI es equivalente:
+    \begin{center}
+        $S \; (\lambda x.e_1) \, (\lambda x.e_2)$
+    \end{center}
+    Esto lo podemos apreciar al aplicar ambas funciones a un argumento $z$.\\
+    Para la abstracción lambda:
+    \begin{center}
+        $(\lambda x.e_1 \, e_2) \, z \rightarrow (e_1[z/x]) \, (e_2[z/x])$
+    \end{center}
+    Por otro lado, para el combinador SKI:
+    \begin{center}
+        $S \; (\lambda x.e_1) \, (\lambda x.e_2) \, z \rightarrow ((\lambda x.e_1) \, z) \, ((\lambda x.e_2) \, z) \rightarrow (e_1[z/x]) \, (e_2[z/x])$
+    \end{center}
+    Es decir, obtenemos el mismo resultado con ambos.\\
+    A esta transformación se le conoce como la transformación $S$, y formalmente se define de la siguiente manera:
+    \begin{center}
+        $\lambda x.e_1 \, e_2 \Rightarrow S \; (\lambda x.e_1) \, (\lambda x.e_2)$
+    \end{center}
+    \item Para el combinador $K$\\
+    Veamos que en una abstracción lambda $(\lambda x.c)$ en dónde $c$ es una constante o variable distinta de $x$. Se toma al argumento $x$ y se deshecha,
+    regresando solamente al argumento $c$. Es decir, el mismo comportamiento que el combinador $K$.\\
+    A esta transformación se le conoce como la transformación $K$, la cuál formalmente se define de la siguiente manera:
+    \begin{center}
+        $\lambda x.c \Rightarrow K \; c $
+    \end{center}
+    \item Para el combinador $I$\\
+    En el cáculo lambda, tenemos que la función identidad está definida de la siguiente manera:
+    \begin{center}
+        $(\lambda x.x) \rightarrow x$
+    \end{center}
+    Es decir, el mismo comportamiento que el combinador $I$.\\
+    A esta transformación se le conoce como la transformación $I$, y se define formalmente de la siguiente manera:
+    \begin{center}
+        $(\lambda x.x) \Rightarrow I $
+    \end{center}
+\end{itemize}
+Utilizando estas transformaciones, es posible definir un algoritmo de compilación que transforma cualquier expresión lambda a una expresión $SKI$.\cite{peytonjones1987the}\\
+Este se define de la siguiente manera:\cite{peytonjones1987the}
+\begin{center}
+    \textbf{WHILE} $e$ contiene una abstracción lambda \textbf{DO}
+    \begin{itemize}
+        \item Escoger cualquier abstracción lambda más interior de $e$
+        \item Si el cuerpo de esta abstracción es una aplicación, es necesario aplicar la transformación $S$
+        \item De otra manera, el cuerpo debe de ser una variable o una constante, así que es necesario aplicar
+        la transformación $K$ o $I$, como sea necesario. 
+    \end{itemize}
+\end{center}
+Veamos un ejemplo de esta compilación, tomando como expresión a compilar a $((\lambda x. \, + \, x \, x ) 5)$:\cite{peytonjones1987the}
+\begin{center}
+    $S \Rightarrow S \; (\lambda x. \, + \, x) \, (\lambda x.x) \, 5$\\
+    $S \Rightarrow S \; (S \; (\lambda x. \, + \, x ) \, (\lambda x.x)) \, (\lambda x.x) \, 5$\\
+    $I \Rightarrow S \; (S \; (\lambda x. \, + \, x ) \, I) \, (\lambda x.x) \, 5$\\
+    $I \Rightarrow S \; (S \; (\lambda x. \, + \, x ) \, I) \, I \, 5$\\
+    $K \Rightarrow S \; (S \; (K \, + ) \, I) \, I \, 5$
+\end{center}
+Por último, podemos evaluarlas para asegurarnos de la correctitud de la expresión anterior:\cite{peytonjones1987the}
+\begin{center}
+    $S \; (S \; (K \, + ) \, I) \, I \, 5$\\
+    $\rightarrow S \; (K \, +) \, I \, 5 \, (I \, 5)$\\
+    $\rightarrow K \, + \, 5 \, (I \, 5) \, (I \, 5)$\\
+    $\rightarrow + \, (I \, 5) \, (I \, 5)$\\
+    $\rightarrow + \, 5 \, (I \, 5)$\\
+    $\rightarrow + \, 5 \, 5$\\
+    $\rightarrow 10$
+\end{center}
 \end{document}
