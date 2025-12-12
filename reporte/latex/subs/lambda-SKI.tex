@@ -63,4 +63,54 @@
         Esta regla nos indica que una función $e_1$ cuenta con un tipo $\sigma \rightarrow \tau$ y un argumento $e_2$ con tipo $\tau$, por lo que el tipo resultante será 
         $\tau$.
     \end{itemize}
+    Por otro lado, para realizar la compilación semántica, utilizamos una serie de reglas similares que producen etiquetas semánticas, la cuáles, dependiendo del caso generan 
+    diferentes combinadores SKI, a continuación se presentan las reglas:\cite{lambdaToSKI}
+    \begin{itemize}
+        \item Para las variables
+        \[
+            \infer[\textsc{EVar}]
+            { }
+            {\tau \;\models\; I}
+        \]
+        Esta regla genera la etiqueta semántica $I$, la cuál simplemente se traduce al combinador SKI $I$ en cualquier caso.
+        \item Al introducir una variable no usada
+        \[
+            \infer[\textsc{EW}]
+            {\Gamma+ \;\models\; d}
+            {\Gamma,\sigma \;\models\; (\models K) \, II\, (\Gamma+ \models d)}
+        \]
+        Esta regla nos indica que al momento de introducir una nueva variable que no es usada en el término, simplemente se ignora, ya que esto se realiza con el combinador $K$,
+        producimos un objeto sintáctico que aplica $K$ utilizando la función de aplicación $II$.
+        \item En caso de no contar con variables libres
+        \[
+            \infer[\textsc{EAbs0}]
+            {\models\; d}
+            {\models\; K \, d}
+        \]
+        Esta regla nos indica que si no contamos con ninguna variable libre, solamente debemos de aplicar el combinador $K$, pues se mantiene constante.
+        \item Al remover una variable usada:
+        \[
+            \infer[\textsc{EAbs}]
+            {\Gamma, \sigma \;\models\; d}
+            {\Gamma \; \models\; d}
+        \]
+        Esta regla nos indica que cuando se remueve una variable que es usada, el objeto se mantiene igual, pero se pierde una entrada en $\Gamma$.
+        \item Para la aplicación de funciones
+        \[
+            \infer[\textsc{EAbs}]
+            {\Gamma_1 \;\models\; d_1
+            \quad
+            \Gamma_2 \;\models\; d_2 }
+            {\Gamma_1 \sqcup \Gamma_2  \; \models\; (\Gamma_1 \models d_1) \, II \, (\Gamma_2 \models d_2)}
+        \]
+        Esta regla nos indica que al momento de aplicar $d_2$ a una expresión $d_1$, debemos de producir un nuevo objeto sintáctico usando la función de aplicación $II$
+    \end{itemize}
+    Por último, tenemos las reglas para la función de aplicación $II$:\cite{lambdaToSKI}
+    \begin{center}
+        $(\models \, d') II (\models \, d) = d' \, d$\\
+        $(\models \, d') II (\tau_n,\ldots,\tau_1 \models \, d) = (\models \, Bd') \, (\tau_n,\ldots,\tau_1 \models \, d)$\\
+        $(\tau_n,\ldots,\tau_1 \models \, d') II (\models \, d) = (\models \, CCd) \, (\tau_n,\ldots,\tau_1 \models \, d')$\\
+        $(\tau_n,\ldots,\tau_1 \models \, d') II (\tau_m,\ldots,\tau_1 \models \, d') = (\tau_n,\ldots,\tau_1 \models (\models S) \, II \, (\tau_n,\ldots,\tau_1 \models \, d')) \, 
+        II \, (\tau_m,\ldots,\tau_1 \models \, d)$\\
+    \end{center}
 \end{document}
