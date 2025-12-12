@@ -2,5 +2,65 @@
 \usepackage{util/estilo}
 
 \begin{document}
-
+    Un problema con que cuenta la compilación introducida en \ref{sssec:ski-intermedio} es que esta tiende
+    a causar que las expresion lambda exploten en tamaño al ser compiladas a SKI.\cite{lambdaToSKI} Esto lo podemos con la expresión $\lambda x. \lambda y. \, y \, x$, pues 
+    al realizar la traducción a SKI, tenemos que:\cite{lambdaToSKI}
+    \begin{center}
+        $\lambda x. \lambda y. \, y \, x$\\
+        $\rightarrow \lambda x. \, S (\lambda y. \, y) \, (\lambda y. \, x)$\\
+        $\rightarrow \lambda x. \, S (I) \, (K \, x)$\\
+        $\vdots$\\
+        $S (S(K \, S)\, (K \, I))(S(K \, K) \, I)$
+    \end{center}
+    Es por esto que en archivo $Kiselyov$ se implementa una traducción distinta basada en la traducción en $OCAML$ descrita en el artículo:\cite{lambdaToSKI}.\\
+    Para entender esta traducción primero es necesario introducir $2$ combinadores nuevos que son casos especiales de la función $S$, estos se definen de la siguiente manera:
+    \cite{lambdaToSKI}
+    \begin{center}
+        $B \: f \, g \, x \rightarrow f \, (gx)$\\
+        $C \: f \, g \, x \rightarrow f \, x\, g$
+    \end{center}
+    En palabras más simple, podemos decir que $B$ representa a la composición de funciones, mientras que $C$ representa el combinador que nos permite voltear argumentos.\cite{lambdaToSKI}\\
+    Un concepto en el cuál se basa esta tradución es en las reglas de tipado para el cálculo lambda escrito con índices de De Brujin.\cite{lambdaToSKI} Estas reglas son:\cite{lambdaToSKI}
+    \begin{itemize}
+    \item Para las variables    
+        \[
+            \infer[\textsc{Var}]
+            { }
+            {\tau \;\vdash\; z : \tau}
+        \]
+        Esta regla nos indica que en un contexto que solo contiene al tipo $\tau$, la variable que cuenta con el índice $0$, denotada por $z$ tiene el tiempo $\tau$.
+    \item Para agregar un nuevo tipo a la izquierda
+        \[
+            \infer[\textsc{WL}]
+            {\Gamma \;\vdash\; e : \tau}
+            {\sigma,\Gamma \;\vdash\; e : \tau}
+        \]
+        Esta regla nos indica que al momento de agregar un nuevo tipo $\sigma$ fuera de la expresión $e$, no se altera el tipo de $e$.
+    \item Para agregar un nuevo tipo a la derecha
+        \[
+            \infer[\textsc{WR}]
+            {\Gamma+ \;\vdash\; e : \tau}
+            {\Gamma+,\sigma \;\vdash\; s \, e : \tau}
+        \]
+        Esta regla nos indica que al momento de agregar un nuevo tipo $\sigma$, debemos de aplicar la función sucesor a $e$ para corregir el índice, pues ahora $s \, e$
+        cuenta con el tipo $\tau$.
+    \item Para agregar nuevas funciones 
+        \[
+            \infer[\textsc{Abs}]
+            {\Gamma,\sigma \;\vdash\; e : \tau}
+            {\Gamma \;\vdash\; \lambda \, e : \sigma \rightarrow \tau}
+        \]
+        Esta regla nos indica que para agregar un nuevo tipo $\lambda e$, debemos de añadir a $\sigma$ al contexto para después proceder a tipar a $e$. Decimos que el tipo
+        de $\lambda$ será $\sigma \rightarrow \tau$
+    \item Al realizar una aplicación de función
+        \[
+            \infer[\textsc{App}]
+            {\Gamma \;\vdash\; e_1 : \sigma \rightarrow \tau
+            \quad
+            \Gamma \;\vdash\; e_2 : \sigma}
+            {\Gamma \;\vdash\; e_1\; e_2 : \tau}
+        \]
+        Esta regla nos indica que una función $e_1$ cuenta con un tipo $\sigma \rightarrow \tau$ y un argumento $e_2$ con tipo $\tau$, por lo que el tipo resultante será 
+        $\tau$.
+    \end{itemize}
 \end{document}
