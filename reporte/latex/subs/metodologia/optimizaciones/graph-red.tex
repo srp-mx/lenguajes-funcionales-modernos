@@ -1,0 +1,26 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+    Graph Reduction es una técnica de evaluación utilizada comunmente en lenguajes funcionales, tales como Haskell. Se puede 
+    considerar el equivalente gráfico a la reducción dentro del cálculo lambda y permite el uso de funciones de alto orden y 
+    evaluación perezosa.
+
+    En las implementaciones de graph reduction las expresiones a evaluar se van a representar dentro de su forma de árboles de 
+    sintaxis, donde las hojas van a representar los valores constantes, como lo son integers, chars y basadoooleans; las funciones 
+    predefinidas, como lo son las operaciones aritmeticas o booleanas; y los nombres de las variables. Se utiliza el símbolo '@' 
+    como una indicación de que el nodo es la aplicación de una función. 
+    
+    \Tree[.@ [f [.x ]]]
+    \begin{center}
+         \textit{Árbol de sintaxis para f(x)}
+    \end{center}
+
+    \Tree[.@ [.@ [.a ][.+ ]] [.b ]]
+    \begin{center}
+         \textit{Árbol de sintaxis para a+b}
+    \end{center}
+    
+    
+
+\end{document}

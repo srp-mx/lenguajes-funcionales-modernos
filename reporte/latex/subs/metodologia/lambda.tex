@@ -1,0 +1,58 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+    El calculo lambda es un sistema formal de la lógica inventado alrededor de 1928 por Alonzo Church. Su objetivo era crear una fundación
+    para la lógica mas natural que la teoría de tipos de Russell o la teoría de conjuntos de Zermelo-Fraenkel. Dicho sistema esta basado 
+    en el concepto de las funciones y sus elementos base son la abstracción ($\lambda x .M$), la operación de formar una función a partir de 
+    la variable que la define, y la aplicación ({F}(X)), la operación de aplicar una función a una variable. \cite{Cardone} \cite{Lambda} \cite{Type} \cite{Set}
+    
+    El calculo lambda se define de forma inductiva de la siguiente manera:  \cite{Manzonetto} 
+    \begin{enumerate}
+        \item Toda variable x es un $\lambda$-término. 
+        \item Si M y N son $\lambda$-términos, entonces (MN) es un $\lambda$-término.
+        \item Si M es un $\lambda$-término y x es una variable, entonces ($\lambda$x.M) es un $\lambda$-término. 
+    \end{enumerate}
+
+    La abstracción lambda es una operación que va a ligar a las variables x en un $\lambda$-término si se encuentran dentro del alcance de la 
+    abstracción lambda $\lambda x$, en otro caso, las variables serán libres. \cite{Manzonetto}
+
+    Denotamos al conjunto de variables libres de un $\lambda$-término M como FV(M). Sea x una variable y sean M, N $\lambda$-términos, entonces
+    podemos definir dicho conjunto de forma inductiva de la siguiente manera:  \cite{Lambda} \cite{Barendsen}
+    \begin{enumerate}
+        \item FV(x) = {x} 
+        \item FV(MN) = FV(M) $\cup$ FV(N)
+        \item FV($\lambda x. M$) = FV(M) - {x}
+    \end{enumerate}
+
+    Denotamos al conjunto de las variables ligadas de un $\lambda$-término M como BV(M). Sea x una variable y sean M, N $\lambda$-términos, entonces
+    podemos definir dicho conjunto de forma inductiva de la siguiente manera: \cite{Lambda} \cite{Barendsen}
+    \begin{enumerate}
+        \item BV(x) = $\emptyset$
+        \item BV(MN) = BV(M) $\cup$ BV(N)
+        \item BV($\lambda x. M$) = FV(M) $\cup$ {x}
+    \end{enumerate}
+
+    Sea x una variable y M, N $\lambda$-términos, definimos a la operación de sustituir por N a las variables libres x en M, cuya notación es 
+    M[x := N], de la siguiente manera: \cite{Lambda} \cite{Barendregt} 
+    \begin{enumerate}
+        \item x[x := N] $\equiv$ N;
+        \item y[x := N] $\equiv$ y, si x $\not \equiv$ y; 
+        \item ($M_1M_2$)[x := N] $\equiv$ ($M_1$[x := N]$M_2$[x := N]); 
+        \item ($\lambda y.M_1$)[x := N] $\equiv$ $\lambda$y.($M_1$(x := N))
+    \end{enumerate}
+
+    Sean M y N $\lambda$-términos, decimos que existe un cambio de variables desde M hasta N si cualquier abstracción $\lambda$ x.A en M 
+    puede ser reemplazada por $\lambda$ y.A[x := y] obteniendo a N. Decimos que M y N son $\alpha$-equivalentes si existe una secuencia de cambio 
+    de variables que empiece en M y termine en N. \cite{Lambda} \cite{Manzonetto}
+    
+    El axioma de la $\beta$-reducción establece que la aplicación de una función ($\lambda$x.M)N reduce el término a M[x := N]. Existe una secuencia 
+    de $\beta$-reducciones desde el $\lambda$-término M hasta N si existe una secuencia finita $s_1, s_2, ..., s_n$ de $\lambda$-términos tales que, 
+    empezando desde M  y terminando en N existe una $\beta$-reducción que reduce $s_k$ a $s_{k+1}$ para cada $k \in \{1,...,n\}$. Un $\beta$-redex 
+    es un $\lambda$-término de M de la forma ($\lambda$x.P)Q que sea candidato a una $\beta$-reducción. Decimos que un término M esta en su forma normal
+    si no existen $\beta$-redex para M. Decimos que N es la forma normal de M si existe una secuencia de $\beta$-reducciones desde M hasta N, tales que 
+    N sea una forma normal.  \cite{Lambda} \cite{Manzonetto}
+
+    
+
+\end{document}
