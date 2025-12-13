@@ -2,25 +2,118 @@
 \usepackage{util/estilo}
 
 \begin{document}
-    Graph Reduction es una técnica de evaluación utilizada comunmente en lenguajes funcionales, tales como Haskell. Se puede 
-    considerar el equivalente gráfico a la reducción dentro del cálculo lambda y permite el uso de funciones de alto orden y 
-    evaluación perezosa.
-
-    En las implementaciones de graph reduction las expresiones a evaluar se van a representar dentro de su forma de árboles de 
-    sintaxis, donde las hojas van a representar los valores constantes, como lo son integers, chars y basadoooleans; las funciones 
-    predefinidas, como lo son las operaciones aritmeticas o booleanas; y los nombres de las variables. Se utiliza el símbolo '@' 
-    como una indicación de que el nodo es la aplicación de una función. 
+    Para poder evaluar las expresiones del programa vamos a representarlas como arboles de sintaxis, donde las hojas van a 
+    representar los valores constantes, como lo son integers, chars y booleans; las funciones predefinidas, como lo son las 
+    operaciones aritmeticas o booleanas; y los nombres de las variables. Se utiliza el símbolo '@' como una indicación de que 
+    el nodo representa la aplicación de una función sobre un conjunto de variables. Representamos la aplicación de una función 
+    f sobre una variable x de la siguiente manera:  \cite{rinus-marko-1993}
     
     \Tree[.@ [f [.x ]]]
     \begin{center}
          \textit{Árbol de sintaxis para f(x)}
     \end{center}
 
+    Si tenemos una función que se aplica sobre mas de una variable, entonces vamos a utilizar la currificación para convertir dicha 
+    función en una serie de funciones anidadas. Por ejemplo, para el caso de una suma de dos variables tenemos el siguiente árbol:
+    \cite{rinus-marko-1993} 
+
     \Tree[.@ [.@ [.a ][.+ ]] [.b ]]
     \begin{center}
          \textit{Árbol de sintaxis para a+b}
     \end{center}
     
-    
+    Podemos representar una $\lambda$-expresión como un árbol de sintaxis de forma que la expresión $\lambda x$ se
+    represente en la raíz del arbol y el cuerpo se represente como la parte inferior del árbol. Podemos entonces representar la 
+    aplicación de una $\lambda$ abstracción de la forma $(\lambda x.M)N$ de la siguiente manera: \cite{rinus-marko-1993} 
+    \cite{peytonjones1987the}
 
+    \Tree[.$\lambda x$ [.@ [.M ][.N ]]]
+    \begin{center}
+        \textit{Árbol de sintaxis para $\lambda x.M$}
+    \end{center}
+
+    Para poder representar los árboles de sintaxis y la forma de implementarlos dentro de un compilador se requiere de una 
+    estructura de datos donde cada nodo en los árboles se represente con una celda, la cual en su lado izquierdo va a contener 
+    una etiqueta que defina el tipo de celda (aplicación, número, operación, o función), mientras que el lado derecho va a
+    contener dos o más celdas para los argumentos. \cite{koopman1990architecture}
+
+    Dicha estructura de datos puede contener la dirección puede incluir dos tipos de instrucciones. Si la celda contiene una 
+    dirección a otra celda entonces decimos que es un puntero y que apunta a dicha celda. En otro caso, si la celda no es un 
+    puntero entonces debe contener un valor atómico. \cite{koopman1990architecture} \cite{peytonjones1987the}
+
+    Cuando un programa de un lenguaje funcional es compilado en una computadora, dicho programa se representa como una gráfica
+    y se va a evaluar mediante el graph reduction, un proceso que consistirá en ejecutar reducciones sucesivas a la gráfica hasta 
+    encontrar una forma normal. \cite{peytonjones1987the} Este proceso va a consistir en dos pasos: seleccionar el siguiente redex
+    por reducir y realizar la reducción. 
+
+    Para seleccionar el siguiente redex hay dos principales estrategias de evaluación: ansiosa y perezosa. En el caso de 
+    lenguajes funcionales se suele utilizar la evaluación perezosa, la cual consiste en evaluar las funciones solo cuando 
+    solo cuando su valor es necesario y solo debe evaluar cada argumento una sola vez. \cite{peytonjones1987the}
+
+    Decimos que un $\lambda$-termino esta froma normal de cabeza si el cuerpo e la expresión no contiene ningun $\lambda$-subtermino
+    al que se le pueda aplicar una $\beta$-reducción. Se diferencia de la forma normal dado que el resto de argumentos aun 
+    puede tener argumentos con $\beta$-reducciones posibles. \cite{Kluge}
+
+    Primero veamos como se va a seleccionar el siguiente redex por reducir. La expresión por reducir va a ser de la forma 
+    f $E_1$ $E_2$ ... $E_n$ y su representación en forma de gráfica es la siguiente: 
+    
+    \Tree[.@ [.... [.@ [.@ [.@ [.f ][.$E_1$ ]][.$E_2$ ]][.$E_3$ ]]][.$E_n$ ]]
+
+    La expresión f puede ser una constante, una función incorporada del lenguaje, o una abstracción lambda; mientras 
+    que tenemos cero o mas argumentos $E_i$ los cuales pueden ser distintas expresiones.  
+    Tendremos entonces tres posibilidades: 
+
+    \begin{enumerate}
+        \item Si f es una constante, entonces la expresión ya se encuentra en forma normal. Sin embargo, si el número 
+        de argumentos $E_i$ es mayor a cero, entonces regresamos un error de tipos ya que se esta intentado aplicar una 
+        constante a los argumentos. 
+        \item Si f es una función incorportada con k argumentos entonces evaluamos el redex mas al exterior. Sin embargo, si el 
+        número de argumentos disponibles $E_i$ es menor a los k argumentos que utiliza la función entonces la expresión
+        ya se encuentra en forma normal.
+        \item Si f es una abstracción lambda y hay un argumento disponible, entonces el siguiente redex a evaluar es (f $E_1$). 
+        Sin embargo si no tenemos argumentos por evaluar entonces la expresión ya se encuentra en forma normal. \cite{peytonjones1987the}
+    \end{enumerate}
+
+    De esta forma para encontrar el siguiente redex por reducir vamos a recorrer el árbol hasta llegar a la hoja mas a la 
+    izquierda en el árbol. A la cadena de nodos de aplicación a la izquierda que vamos a recorrer se le denomina la espina 
+    de la expresión y acto de descender por esta espina se le denomina "desenrollar" la espina. Así habiendo llegado a la 
+    "punta" de la espina y encontrado el siguiente redex por reducir vamos a regresar a su raíz y continuar al siguiente paso.
+     \cite{spine}
+
+    El siguiente paso consiste en realizar la reducción, este proceso consiste en realizar transformaciones locales a la 
+    gráfica que representa a la expresión. Estos pasos se deben repetir hasta llegar a una gráfica en su forma normal final,
+    la cual será el resultado de la evaluación.\cite{peytonjones1987the}
+
+    Durante la reducción de los árboles en la gráfica vamos a encontrar casos donde va a haber varias copias del mismo argumento, 
+    y vamos a querer evitar tener varias copias del mismo argumento en el árbol. Esto debido a que va a desperdiciarse espacio 
+    en la memoria y en el caso de que el argumento contenga redex tendremos que desperdiciar tiempo reduciendo el mismo redex
+    multiples veces. Este problema puede solucionarse al reemplazar el argumento por un puntero al parámetro formal. \cite{Wadsworth}
+
+    Notaremos que al utilizar una estructura con multiples punteros al mismo argumento ya no estaremos manejando un árbol binario,
+    sino que tendremos una gráfica que nos provee con una representación mas compacta de la expresión que estamos evaluando. Es 
+    de esta manera que al momento de evaluar las expresiones en la gráfica cada subgráfica va a representar más de una subexpresión
+    en la expansión lineal de la gráfica, permitiendonos reducir multiples redex de forma simultanea. \cite{Wadsworth}
+
+    Cuando aplicamos una abstracción lambda es necesario instanciar una nueva copia del cuerpo de la $\lambda$-expresión en lugar
+    de actualizar el cuerpo de la función con las substituciones. Esto se debe a que la abstracción puede aplicarse muchas veces 
+    y el cuerpo de la función va a utilizarse para construir una nueva instancia cada vez que se aplica la abstracción, por lo 
+    que no se debe modificar el cuerpo original. \cite{Wadsworth}
+
+    De esta manera el algoritmo para reducción consiste en repetir los siguientes pasos hasta haber reducido la gráfica a su 
+    forma normal. 
+
+    \begin{enumerate}
+        \item Desenrolla la espina hasta encontrar un nodo que no sea una aplicación.
+        \item Examina el nodo encontrado en la punta de la espina. 
+        \begin{enumerate}
+            \item Constante. Verifica que no se haya aplicado a algo, en ese caso es una forma normal de cabeza y se detiene el 
+            algoritmo. En otro caso, regresamos un error. 
+            \item Función incorporada. Verifica el número de argumentos. Si hay muy pocos argumentos tenemos una forma normal de 
+            cabeza y detenemos el algoritmo. En otro caso evaluamos los argumentos necesarios ejecutando la función incorporada 
+            y reemplezando la raíz por el resultado. 
+            \item Abstracción lambda. Verifica si existe un argumento. Si no hay un argumento tenemos una forma normal y 
+            detenemos el algoritmo. En otro caso instanciamos el cuerpo de la abstracción lambda, sustituyendo los punteros 
+            del argumento por el parámetro formal y sobreescribiendo la raíz del redex por el resultado. \cite{peytonjones1987the}
+        \end{enumerate}
+    \end{enumerate}
 \end{document}

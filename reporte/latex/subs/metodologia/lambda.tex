@@ -2,7 +2,7 @@
 \usepackage{util/estilo}
 
 \begin{document}
-    El calculo lambda es un sistema formal de la lógica inventado alrededor de 1928 por Alonzo Church. Su objetivo era crear una fundación
+    El calculo lambda es un sistema formal de la lógica inventado alrededor de 1928 por Alonzo Church. Su objetivo era crear una fundación 
     para la lógica mas natural que la teoría de tipos de Russell o la teoría de conjuntos de Zermelo-Fraenkel. Dicho sistema esta basado 
     en el concepto de las funciones y sus elementos base son la abstracción ($\lambda x .M$), la operación de formar una función a partir de 
     la variable que la define, y la aplicación ({F}(X)), la operación de aplicar una función a una variable. \cite{Cardone} \cite{Lambda}
@@ -17,7 +17,7 @@
     La abstracción lambda es una operación que va a ligar a las variables x en un $\lambda$-término si se encuentran dentro del alcance de la 
     abstracción lambda $\lambda x$, en otro caso, las variables serán libres. \cite{Manzonetto}
 
-    Denotamos al conjunto de variables libres de un $\lambda$-término M como FV(M). Sea x una variable y sean M, N $\lambda$-términos, entonces
+    Denotamos al conjunto de variables libres de un $\lambda$-término M como FV(M). Sea x una variable y sean M, N $\lambda$-términos, entonces 
     podemos definir dicho conjunto de forma inductiva de la siguiente manera: \cite{Barendsen}
     \begin{enumerate}
         \item FV(x) = {x} 
@@ -25,8 +25,8 @@
         \item FV($\lambda x. M$) = FV(M) - {x}
     \end{enumerate}
 
-    Denotamos al conjunto de las variables ligadas de un $\lambda$-término M como BV(M). Sea x una variable y sean M, N $\lambda$-términos, entonces
-    podemos definir dicho conjunto de forma inductiva de la siguiente manera: \cite{Barendsen}
+    Denotamos al conjunto de las variables ligadas de un $\lambda$-término M como BV(M). Sea x una variable y sean M, N $\lambda$-términos, 
+    entonces podemos definir dicho conjunto de forma inductiva de la siguiente manera: \cite{Barendsen}
     \begin{enumerate}
         \item BV(x) = $\emptyset$
         \item BV(MN) = BV(M) $\cup$ BV(N)
@@ -43,20 +43,21 @@
     \end{enumerate}
 
     Sean M y N $\lambda$-términos, decimos que existe un cambio de variables desde M hasta N si cualquier abstracción $\lambda$ x.A en M 
-    puede ser reemplazada por $\lambda$ y.A[x := y] obteniendo a N. Decimos que M y N son $\alpha$-equivalentes si existe una secuencia de cambio 
-    de variables que empiece en M y termine en N. \cite{Lambda} \cite{Manzonetto}
+    puede ser reemplazada por $\lambda$ y.A[x := y] obteniendo a N. Decimos que M y N son $\alpha$-equivalentes si existe una secuencia 
+    de cambio de variables que empiece en M y termine en N. \cite{Lambda} \cite{Manzonetto}
     
-    Sean A y B $\lambda$-términos, decimos que existe una $\beta$-reducción entre A y B de un solo paso (A $\triangleright$_{\beta,1} B) si existe un subtermino C 
-    de A, una variable x y $\lambda$-terminos M y N tales que C $\equiv$ ($\lambda$ x.M)N y tales que cuando reemplazamos C en A por el $\lambda$-termino 
-    $\alpha$-equivalente M[x := N] obtenemos a B. \cite{Lambda} \cite{Manzonetto}
+    Sean A y B $\lambda$-términos, decimos que existe una $\beta$-reducción entre A y B de un solo paso (A $\triangleright$_{\beta,1} B)
+    si existe un subtermino C de A, una variable x y $\lambda$-terminos M y N tales que C $\equiv$ ($\lambda$ x.M)N y tales que cuando 
+    reemplazamos C en A por el $\lambda$-termino $\alpha$-equivalente M[x := N] obtenemos a B. \cite{Lambda} \cite{Manzonetto}
     
-    Decimos que existe una secuencia de $\beta$-reducciones desde el $\lambda$-término M hasta el $\lambda$-termino N (M $\triangleright$ N) si existe una secuencia 
-    finita $s_1, s_2, ..., s_n$ de $\lambda$-términos tales que, empezando desde M y terminando en N, existe una $\beta$-reducción $s_k$ $\triangleright$_{\beta,1} $s_{k+1}$
-    para cada $k \in \{1,...,n\}$. \cite{Lambda} \cite{Manzonetto}
+    Decimos que existe una secuencia de $\beta$-reducciones desde el $\lambda$-término M hasta el $\lambda$-termino N (M $\triangleright$ N) 
+    si existe una secuencia finita $s_1, s_2, ..., s_n$ de $\lambda$-términos tales que, empezando desde M y terminando en N, existe una 
+    $\beta$-reducción $s_k$ $\triangleright$_{\beta,1} $s_{k+1}$ para cada $k \in \{1,...,n\}$. \cite{Lambda} \cite{Manzonetto}
     
-    Se denomina $\beta$-redex a un $\lambda$-término de M de la forma ($\lambda$x.P)Q tal que M sea un candidato a una $\beta$-reducción. Al hacer dicha $\beta$-reducción
-    decimos que se contrata al $\beta$-redex. Un $\lambda$-termino es una forma normal si no contiene a ningun $\beta$-redex.  Decimos que N es la forma normal de M 
-    si existe una secuencia de $\beta$-reducciones desde M hasta N, tales que N sea una forma normal.  \cite{Lambda} \cite{Manzonetto}
+    Se denomina $\beta$-redex a un $\lambda$-término de M de la forma ($\lambda$x.P)Q tal que M sea un candidato a una $\beta$-reducción. 
+    Al hacer dicha $\beta$-reducción decimos que se contrata al $\beta$-redex. Un $\lambda$-termino es una forma normal si no contiene a 
+    ningun $\beta$-redex.  Decimos que N es la forma normal de M si existe una secuencia de $\beta$-reducciones desde M hasta N, tales 
+    que N sea una forma normal.  \cite{Lambda} \cite{Manzonetto}
 
 
 \end{document}
