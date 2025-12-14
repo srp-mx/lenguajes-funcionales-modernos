@@ -21,10 +21,24 @@ Por ejemplo,
 ```bash
 cabal run subs-compiler-strict -- -o cuenta-diez < ../program-samples/subs/numbers.subs
 ```
+```bash
+cabal run subs-compiler-lazy -- -o cuenta-veinte < ../program-samples/subs/twenty.subs
+```
 
 Y puedes correr tu programa al ir al directorio generado `compiler-build`,
 donde se encontrará tu programa, al cual puedes pasarle datos como argumentos
 de la línea de comandos.
+
+```
+Las cadenas se pasan comenzando con '/', por ejemplo ./cuenta-diez /a /b
+
+Los números deben ser naturales, por ejemplo ./cuenta-diez 2 /a /b
+
+Se puede pasar textualmente true y false, por ejemplo ./cuenta-diez false /a /b
+```
+
+Si el programa (con argumentos) es irreducible pero no se reduce a una cadena,
+se termina la ejecución con estatus de error, sin imprimir nada.
 
 Los lenguajes disponibles son todos azúcar sintáctica del lenguaje del cálculo
 de combinadores SKI con cadenas. Éstos son:
@@ -37,6 +51,7 @@ de combinadores SKI con cadenas. Éstos son:
 Los modos disponibles son:
 
 * `strict`: Evaluación estricta al compilar a un *runtime* de C++
+* `lazy`: Evaluación perezosa al compilar a un *runtime* de C++
 
 ### Lenguajes
 
