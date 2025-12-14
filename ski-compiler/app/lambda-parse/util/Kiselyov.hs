@@ -21,7 +21,7 @@ import qualified Data.HashMap.Lazy as HM
 kiselyov :: Lambda -> Either String Expr
 kiselyov l = do
     l' <- toDeBrujin l
-    Right $ (observe . conv) l'
+    Right $ observe (conv l')
 
 -- |Gramática lambda extendida con índices de Brujin
 data Lam
@@ -83,21 +83,45 @@ data Bulk
 uclose :: Expr -> Bulk
 uclose = Core
 
+-- |Caso base de Bn
+kB' :: Expr
+kB' = BComb $!! BComb
+
+-- |Caso base de Sn
+kS' :: Expr
+kS' = BComb $!! (BComb $!! SComb) $!! BComb
+
+-- |Caso base de Cn
+kC' :: Expr
+kC' = BComb $!! (BComb $!! CComb) $!! BComb
+
+-- |Generador de Bn
+kBs :: [Expr]
+kBs = iterate (\d -> kB' $!! d) BComb
+
+-- |Generador de Sn
+kSs :: [Expr]
+kSs = iterate (\d -> kS' $!! d) SComb
+
+-- |Generador de Cn
+kCs :: [Expr]
+kCs = iterate (\d -> kC' $!! d) CComb
+
 -- |Función auxiliar de proyección de Bulk->Open (Expr)
 uopen :: Bulk -> Expr
 uopen (Core d) = d
 uopen (Bn n)
     | n <= 0 = IComb
     | n == 1 = BComb
-    | otherwise = foldl EApp BComb (replicate (n-1) BComb)
+    | otherwise = kBs !! (n-1)
 uopen (Cn n)
     | n <= 0 = IComb
     | n == 1 = CComb
-    | otherwise = foldl EApp CComb (replicate (n-1) CComb)
+    | otherwise = kCs !! (n-1)
 uopen (Sn n)
     | n <= 0 = IComb
     | n == 1 = SComb
-    | otherwise = foldl EApp SComb (replicate (n-1) SComb)
+    | otherwise = kSs !! (n-1)
 uopen (UApp x y) = uopen x $!! uopen y
 
 -- |Operador que sirve como atajo para UApp, imitando el código en OCaml
@@ -122,7 +146,7 @@ infixl 9 $$
 ($$) (Need d1 l1) (Need d2 l2)
     | l1 == l2 = Need (Sn l1 $? d1 $? d2) l1
     | l1 < l2 = Need (Bn (l2-l1) $? (Sn l1 $? d1) $? d2) l2
-    | otherwise = Need (Cn (l1-l2) $? (Bn (l1-l2) $? (Sn l2 $? d1)) $? d2) l1
+    | otherwise = Need (Cn (l1-l2) $? (Bn (l1-l2) $? Sn l2 $? d1) $? d2) l1
 
 -- |uI en el código original
 bulkI :: Bulk
