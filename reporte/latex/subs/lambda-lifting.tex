@@ -39,28 +39,17 @@ pues la reducción del primer argumento dará lugar a una nueva abstracción
 dependiente de $y$ y de $z$ en la que $x$ habrá sido sustituida por el argumento,
 comportamiento que se repite con el argumento para $y$ y no es hasta la
 aplicación del tercer argumento que la instancia del cuerpo de la función
-está completamente construido, listo para su evaluación.
-En consecuencia, este tipo de expresiones generan instancias intermedias
+está completamente construido, listo para su evaluación. De forma general, es
+posible notar que el problema surge debido a la existencia de variables libres
+en las expresiones lambda.
+Como consecuencia, este tipo de expresiones generan instancias intermedias
 del cuerpo de la función que podrían ahorrarse si realizáramos sustituciones
-simultáneamente de varios argumentos pues el resultado es el mismo
+simultáneamente de varios argumentos pues el resultado se mantiene
 \cite[p.~222]{peytonjones1987the}.
 
-Este tipo de abstracciones lambda que permiten la reducción simultánea
-se nombran como \textit{supercombinadores} y se definen en
-\cite[p.~223]{peytonjones1987the} como sigue:
-
-\defn{Supercombinador:} Un supercombinador, denotado con un identificador
-arbitrario antecedido por \$, de \textit{aridad}
-$n$ es una expresión de la forma $\lambda x_1.\lambda x_2.\cdots.\lambda x_n.E$
-donde $E$ no es una expresión lambda. Y que además, satisface las siguientes
-condiciones:
-\begin{itemize}
-\item \$S no tiene variables libres
-\item Cualquier abstracción lambda en su cuerpo es también un supercombinador
-\item $n \ge 0$, es decir, puede no contener expresiones lambda
-\end{itemize}    
-
-A la aplicación de un combinador la llamamos \textit{redex de supercombinador}
+Al tipo de abstracciones lambda que permiten la reducción simultánea
+se les conoce como \textit{supercombinadores} y se definieron en la
+sección \ref{ssec:ski}. A la aplicación de un combinador la llamamos \textit{redex de supercombinador}
 y como resultado de su \textit{reducción} obtenemos una instancia del cuerpo
 del supercombinador pero con las ocurrencias de sus variables libres,
 sustituidas por los argumentos correspondientes. De esta forma una expresión
@@ -213,7 +202,8 @@ Aplicaremos el algoritmo para ilustrar su funcionamiento.
     \end{center}
   \end{itemize}
 
-\item Ahora con
+\item Ahora con:
+  
   $\lambda positivos.\;
        \bigl( \$F3 \; positivos \bigr)\; (\text{maximum}\, positivos)$
   
@@ -273,7 +263,6 @@ Que se podría reducir como sigue:
   &\rightarrow \bigl( \$F4 \bigr)\; (\text{filter}\, \$F2\, [2,4,6])\\
   &\rightarrow \bigl( \$F4 \bigr)\; (\text{filter}\,  (>\, k\, 0)\, [2,4,6])\\
   &\rightarrow \bigl( \$F4 \bigr)\; [2,4,6]\\
-  %&\rightarrow \bigl( \bigl( \$F3 \; positivos \bigr)\; (\text{maximum}\, positivos) \bigr)\; [2,4,6]\\
   &\rightarrow \bigl( \bigl( \$F3 \; [2,4,6] \bigr)\; (\text{maximum}\,  [2,4,6]) \bigr)\\
   &\rightarrow \bigl( \$F3 \; [2,4,6]\; 6 \bigr)\\
   &\rightarrow \bigl( \text{map}\, (\$F1\; 6)\, [2,4,6] \bigr)\\
@@ -290,4 +279,32 @@ y para ello es necesario contemplar aspectos como el orden en el que se
 definen los parámetros adicionales con base en su nivel de profundidad, lo
 que se puede hacer por ejemplo, con los índices de De Bruijn
 \cite[p.~230]{peytonjones1987the}.
+
+Esta técnica permite resolver el problema de las variables libres en las
+declaraciones de funciones locales, reduciendo así la necesidad de crear
+\textit{closures} durante su evaluación \cite{HF-LambdaLifting}. Es
+cierto que, en determinados escenarios esto no se traduce necesariamente
+en una mejora del rendimiento, ya que, dependiendo del patrón de
+llamadas de la función, puede resultar más eficiente crear un
+\textit{closure} que introducir un parámetro adicional.
+A pesar de ello, en términos generales, el uso de esta técnica suele
+ser beneficioso cuando la función a ser elevada tiene pocas
+llamadas \cite{HF-LambdaLifting}.
+
+En el compilador GHC, el método por defecto para el manejo de variables
+libres se denomina \textit{closure conversion} \cite{HF-LambdaLifting}.
+Este proceso consiste en transformar una función con variables libres
+en una nueva función que recibe explícitamente un ambiente, el cual
+contiene los valores de dichas variables
+\cite{HF-Glossary-ClosureConversion}. De esta manera, la función
+resultante deja de depender del contexto original y obtiene
+todos los valores necesarios a partir de su ambiente.
+
+Adicionalmente, GHC cuenta con una implementación de lambda lifting,
+conocida como \textit{late lambda lifting}, que se aplica justo antes
+de la fase de generación de código, con el objetivo de no interferir
+con otras optimizaciones del compilador. Una característica importante
+de esta implementación es que emplea criterios de selectividad para
+determinar qué funciones son candidatas a ser transformadas mediante
+este proceso \cite{HF-LambdaLifting}.
 \end{document}
