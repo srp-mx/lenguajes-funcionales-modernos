@@ -11,7 +11,7 @@ import Text.RawString.QQ
 
 -- |Información de la generación de código
 codeGenInfo :: String
-codeGenInfo = "Generador de código SKI estricto"
+codeGenInfo = "Generador de código SKI lazy"
 
 -- |Genera el programa objetivo en C++
 codeGen :: Expr -> String
@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     Ref<Node> result = Evaluate(p);
     if (auto s = dynamic_pointer_cast<Str>(result)) {
         cout << s->s << "\n";
-    }
+    } else return 1;
 #endif
     return 0;
 }|]
