@@ -8,6 +8,22 @@ import System.Directory (createDirectoryIfMissing)
 import Parser (parser, parserInfo)
 import CodeGenerator (codeGen, codeGenInfo)
 
+gxxFlags :: [String]
+gxxFlags =
+    [ "-std=c++20"
+    , "-O3"
+    , "-march=native"
+    , "-flto"
+    , "-DNDEBUG"
+    , "-pipe"
+    , "-ffunction-sections"
+    , "-fdata-sections"
+    , "-Wl,--gc-sections"
+    , "-Wl,-O1"
+    , "-Wl,--as-needed"
+    , "-s"
+    ]
+
 main :: IO ()
 main = do
     putStrLn ("Parser: " ++ parserInfo)
@@ -26,5 +42,5 @@ main = do
             let cppFile = buildDir ++ outFile ++ ".cpp"
             let binFile = buildDir ++ outFile
             writeFile cppFile cppCode
-            callProcess "g++" ["-O3", "-std=c++17", cppFile, "-o", binFile]
+            callProcess "g++" (gxxFlags ++ [cppFile, "-o", binFile])
             putStrLn $ "Compilado programa a " ++ binFile
