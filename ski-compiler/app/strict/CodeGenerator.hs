@@ -19,307 +19,276 @@ codeGen expr =
     let oexpr = optimizeExpr expr
     in prelude
        ++ pregen oexpr
-       ++ "const static Ref<Node> program = " ++ gen oexpr ++ ";"
+       ++ "Value ProgramExpr = " ++ gen oexpr ++ ";"
        ++ [r|
-int main(int argc, char** argv) {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    Ref<Node> p = program;
+int main(int argc, char* argv[]) {
+    Value result = ProgramExpr;
     for (int i = 1; i < argc; ++i) {
-        p = p-ParseArg(argv[i]);
+        result = result-ParseArg(argv[i]);
     }
-#ifdef TRACE
-    auto trace = Trace(p, traceSteps);
-    for (auto& step : trace) {
-        cout << Show(step) << endl;
-    }
-#else
-    Ref<Node> result = Evaluate(p);
-    if (auto s = dynamic_pointer_cast<Str>(result)) {
-        cout << s->s << "\n";
-    }
-#endif
+    std::cout << pretty(result) << "\n";
     return 0;
 }|]
 
 -- |Preludio del código a generar
 prelude :: String
 prelude = [r|// CÓDIGO GENERADO CON srp-mx/lenguajes-funcionales-modernos
-#include <bits/stdc++.h>
-#ifdef TRACE
-constexpr int traceSteps = (TRACE);
-#endif
-using namespace std;
-struct Node; struct Closure; struct Str; struct App;
-#define mk make_shared
-template<typename T> using Ref = shared_ptr<T>;
-inline static Ref<Node> operator-(const Ref<Node>& a, const Ref<Node>& b) {
-    return static_pointer_cast<Node>(mk<App>(a, b));
-}
-struct Parenty {
-    Ref<Parenty> P; Ref<Node> Value; int Depth;
-    Parenty(Ref<Node> value, Ref<Parenty> p = nullptr)
-        : P(move(p)), Value(move(value)), Depth(P ? P->Depth + 1 : 0) {}
-    vector<Ref<Node>> Collect() const {
-        vector<Ref<Node>> outputs(Depth + 1);
-        const Parenty* cur = this;
-        while (cur) {
-            outputs[cur->Depth] = cur->Value;
-            cur = cur->P.get();
-        }
-        return outputs;
-    }
+#include <iostream>
+#include <string>
+#include <functional>
+#include <variant>
+#include <stdexcept>
+struct Value;
+using Func = std::function<Value(const Value&)>;
+struct Value {
+    std::variant<std::string, Func> data;
+    Value() : data(std::string{}) {}
+    Value(std::string s) : data(std::move(s)) {}
+    Value(Func f) : data(std::move(f)) {}
+    bool isString() const { return std::holds_alternative<std::string>(data); }
+    bool isFunc()   const { return std::holds_alternative<Func>(data); }
+    const std::string& asString() const { return std::get<std::string>(data); }
+    const Func&        asFunc()   const { return std::get<Func>(data); }
 };
-struct Node : enable_shared_from_this<Node> {
-    virtual ~Node() = default;
-    virtual Ref<Node> StepOnce() = 0;
-    virtual string Show_() const = 0;
-};
-inline static string Show(const Ref<Node>& n) {
-    if (!n) return "⊥";
-    return n->Show_();
-}
-struct Str : Node {
-    string s;
-    explicit Str(string s_) : s(move(s_)) {}
-    Ref<Node> StepOnce() override { return shared_from_this(); }
-    string Show_() const override { return string("\"") + s + "\""; }
-};
-inline static Ref<Node> operator+(const Ref<Str>& a, const Ref<Str>& b) {
-    return mk<Str>(a->s + b->s);
-}
-struct Closure : Node {
-    const Ref<Parenty> captures;
-    explicit Closure(Ref<Parenty> caps = nullptr) : captures(move(caps)) {}
-    virtual string name() const = 0;
-    virtual Ref<Node> Apply(const Ref<Node>& arg) = 0;
-    Ref<Node> StepOnce() override { return shared_from_this(); }
-    string Show_() const override {
-        string s = name();
-        if (!captures) return s;
-        for (const auto& cap : captures->Collect()) {
-            s += "[" + Show(cap) + "]";
-        }
-        return s;
-    }
-};
-struct App : Node {
-    Ref<Node> left, right;
-    App(Ref<Node> l, Ref<Node> r) : left(move(l)), right(move(r)) {}
-    Ref<Node> app(const Ref<Node>& nextL, const Ref<Node>& nextR) {
-        if (nextL.get() == left.get() && nextR.get() == right.get())
-            return shared_from_this();
-        return nextL-nextR;
-    }
-    Ref<Node> StepOnce() override {
-        if (auto f = dynamic_pointer_cast<Closure>(left)) {
-            return f->Apply(right);
-        }
-        if (auto l = dynamic_pointer_cast<App>(left)) {
-            return app(l->StepOnce(), right);
-        }
-        if (auto lstr = dynamic_pointer_cast<Str>(left)) {
-            if (auto rstr = dynamic_pointer_cast<Str>(right)) {
-                return lstr + rstr;
+#define St(x) Value(x)
+Value Apply(const Value& f, const Value& x) {
+    if (f.isString()) {
+        if (x.isString()) {
+            return Value(f.asString() + x.asString());
+        } else if (x.isFunc()) {
+            Value rhs = x.asFunc()(Value(""));
+            if (rhs.isString()) {
+                return Value(f.asString() + rhs.asString());
             }
-            if (auto ra = dynamic_pointer_cast<App>(right)) {
-                if (auto rl = dynamic_pointer_cast<Str>(ra->left)) {
-                    return (lstr + rl)-(ra->right);
-                }
-                return app(left, right->StepOnce());
-            }
-            return app(left, right->StepOnce());
-        }
-        return app(left, right->StepOnce());
-    }
-    string Show_() const override {
-        return "(" + Show(left) + " @ " + Show(right) + ")";
-    }
-};
-template<typename Tag, size_t Arity>
-struct ClosureImp : Closure {
-    static_assert(Arity >= 1, "La aridad de un combinador debe ser al menos 1");
-    explicit ClosureImp(Ref<Parenty> caps = nullptr) : Closure(move(caps)) {}
-    inline string cname() const;
-    string name() const override { return cname(); }
-    inline Ref<Node> OnSaturation(const Ref<Node>& arg) const;
-    Ref<Node> Apply(const Ref<Node>& arg) override {
-        if constexpr (Arity == 1) {
-            return OnSaturation(arg);
+            throw std::runtime_error("Apply: se aplico cadena a un resultado no-cadena");
         } else {
-            if (!captures || captures->Depth < Arity-2) {
-                return mk<ClosureImp<Tag,Arity>>(mk<Parenty>(arg,captures));
-            }
-            return OnSaturation(arg);
+            throw std::runtime_error("Apply: se aplico cadena a no-cadena");
         }
     }
-};
-template<typename Iter>
-static inline Ref<Node> ApplyRange(Ref<Node> f, Iter begin, Iter end) {
-    Ref<Node> t = move(f);
-    for (Iter it = begin; it != end; ++it) {
-        t = t - *it;
+    if (!f.isFunc()) {
+        throw std::runtime_error("Apply: se aplico un valor no-funcion");
     }
-    return t;
+    return f.asFunc()(x);
 }
-#define COMBINATOR(NAME, ARITY) \
-    struct NAME##_Tag_ {}; \
-    using NAME = ClosureImp<NAME##_Tag_, ARITY>; \
-    template<> inline string NAME::cname() const { return #NAME; } \
-    template<> inline Ref<Node> NAME::OnSaturation(const Ref<Node>& arg) const
-struct Bn_Tag_ {};
-#define BN_MK(N) \
-    using Bn##N = ClosureImp<Bn_Tag_, N+2>; \
-    template<> inline string Bn##N::cname() const { return "B" #N; } \
-    template<> inline Ref<Node> Bn##N::OnSaturation(const Ref<Node>& arg) const {\
-        auto caps = this->captures->Collect(); \
-        Ref<Node> f = caps[0], g = caps[1]; \
-        Ref<Node> gx = ApplyRange(g, caps.begin() + 2, caps.end()); \
-        gx = gx - arg; \
-        return f - gx; \
-    } \
-    const static Ref<Bn##N> Bn##N##_ = mk<Bn##N>();
-struct Cn_Tag_ {};
-#define CN_MK(N) \
-    using Cn##N = ClosureImp<Cn_Tag_, N+2>; \
-    template<> inline string Cn##N::cname() const { return "C" #N; } \
-    template<> inline Ref<Node> Cn##N::OnSaturation(const Ref<Node>& arg) const {\
-        auto caps = this->captures->Collect(); \
-        Ref<Node> f = caps[0], g = caps[1]; \
-        Ref<Node> fx = ApplyRange(f, caps.begin() + 2, caps.end()); \
-        fx = fx - arg; \
-        return fx - g; \
-    } \
-    const static Ref<Cn##N> Cn##N##_ = mk<Cn##N>();
-struct Sn_Tag_ {};
-#define SN_MK(N) \
-    using Sn##N = ClosureImp<Sn_Tag_, N+2>; \
-    template<> inline string Sn##N::cname() const { return "S" #N; } \
-    template<> inline Ref<Node> Sn##N::OnSaturation(const Ref<Node>& arg) const {\
-        auto caps = this->captures->Collect(); \
-        Ref<Node> f = caps[0], g = caps[1]; \
-        Ref<Node> fx = ApplyRange(f, caps.begin() + 2, caps.end()); \
-        fx = fx - arg; \
-        Ref<Node> gx = ApplyRange(g, caps.begin() + 2, caps.end()); \
-        gx = gx - arg; \
-        return fx - gx; \
-    } \
-    const static Ref<Sn##N> Sn##N##_ = mk<Sn##N>();
-COMBINATOR(I, 1) { return arg; }
-COMBINATOR (K, 2) { return captures->Value; }
-COMBINATOR(S, 3) {
-    auto caps = this->captures->Collect();
-    Ref<Node> x = caps[0], y = caps[1], z = arg;
-    return (x-z)-(y-z);
-}
-COMBINATOR(B, 3) {
-    auto caps = this->captures->Collect();
-    Ref<Node> f = caps[0], g = caps[1], x = arg;
-    return f-(g-x);
-}
-COMBINATOR(C, 3) {
-    auto caps = this->captures->Collect();
-    Ref<Node> f = caps[0], g = caps[1], x = arg;
-    return f-x-g;
-}
-COMBINATOR(Sp, 4) {
-    auto caps = this->captures->Collect();
-    Ref<Node> c = caps[0], f = caps[1], g = caps[2], x = arg;
-    return c-(f-x)-(g-x);
-}
-COMBINATOR(Cp, 4) {
-    auto caps = this->captures->Collect();
-    Ref<Node> c = caps[0], f = caps[1], g = caps[2], x = arg;
-    return c-(f-x)-g;
-}
-COMBINATOR(Bs, 4) {
-    auto caps = this->captures->Collect();
-    Ref<Node> c = caps[0], f = caps[1], g = caps[2], x = arg;
-    return c-(f-(g-x));
-}
-COMBINATOR(Succ, 3) {
-    auto caps = this->captures->Collect();
-    Ref<Node> n = caps[0], f = caps[1], x = arg;
-    return f-(n-f-x);
-}
-COMBINATOR(Dup, 3) {
-    auto caps = this->captures->Collect();
-    Ref<Node> n = caps[0], f = caps[1], x = arg;
-    return n-f-(n-f-x);
-}
-static bool haltEval(const Ref<Node>& next, const Ref<Node>& current) {
-    return next.get() == current.get();
-}
-static Ref<Node> Evaluate(Ref<Node> expr) {
-    Ref<Node> current = move(expr);
-    for (;;) {
-        Ref<Node> next = current->StepOnce();
-        if (haltEval(next, current)) break;
-        current = move(next);
+inline static Value operator-(const Value& f, const Value& x) { return Apply(f,x); }
+// Bs c f g x = c (f (g x))
+Value Bs = Value(Func{
+    [](const Value& c) -> Value {
+        return Value(Func{
+            [c](const Value& f) -> Value {
+                return Value(Func{
+                    [c,f](const Value& g) -> Value {
+                        return Value(Func{
+                            [c,f,g](const Value& x) -> Value {
+                                Value gx = Apply(g,x);
+                                Value fgx = Apply(f,gx);
+                                return Apply(c, fgx);
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
-    return current;
-}
-static vector<Ref<Node>> Trace(Ref<Node> expr, int maxSteps) {
-    vector<Ref<Node>> out;
-    Ref<Node> current = move(expr);
-    out.push_back(current);
-    for (int i = 0; i < maxSteps; ++i) {
-        Ref<Node> next = current->StepOnce();
-        if (haltEval(next, current)) break;
-        out.push_back(next);
-        current = move(next);
+});
+// C' c f g x = c (f x) g
+Value Cp = Value(Func{
+    [](const Value& c) -> Value {
+        return Value(Func{
+            [c](const Value& f) -> Value {
+                return Value(Func{
+                    [c,f](const Value& g) -> Value {
+                        return Value(Func{
+                            [c,f,g](const Value& x) -> Value {
+                                Value fx = Apply(f,x);
+                                Value cfx = Apply(c,fx);
+                                return Apply(cfx, g);
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
-    return out;
-}
-const static Ref<I> I_ = mk<I>();
-const static Ref<K> K_ = mk<K>();
-const static Ref<S> S_ = mk<S>();
-const static Ref<B> B_ = mk<B>();
-const static Ref<C> C_ = mk<C>();
-const static Ref<Sp> Sp_ = mk<Sp>();
-const static Ref<Cp> Cp_ = mk<Cp>();
-const static Ref<Bs> Bs_ = mk<Bs>();
-const static Ref<Succ> Succ_ = mk<Succ>();
-const static Ref<Dup> Dup_ = mk<Dup>();
-const static Ref<Node> Z = K_-I_;
-static int log2_ull(unsigned long long n) {
-#if defined(__GNUC__)
-    return 63 - __builtin_clzll(n);
-#else
-    int r = -1;
-    while (n) { n >>= 1; ++r; }
+});
+// S' c f g x = c (f x) (g x)
+Value Sp = Value(Func{
+    [](const Value& c) -> Value {
+        return Value(Func{
+            [c](const Value& f) -> Value {
+                return Value(Func{
+                    [c,f](const Value& g) -> Value {
+                        return Value(Func{
+                            [c,f,g](const Value& x) -> Value {
+                                Value fx = Apply(f,x);
+                                Value gx = Apply(g,x);
+                                Value cfx = Apply(c,fx);
+                                return Apply(cfx, gx);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+});
+// C f g x = f x g
+Value C = Value(Func{
+    [](const Value& f) -> Value {
+        return Value(Func{
+            [f](const Value& g) -> Value {
+                return Value(Func{
+                    [f,g](const Value& x) -> Value {
+                        Value fx = Apply(f, x);
+                        return Apply(fx, g);
+                    }
+                });
+            }
+        });
+    }
+});
+// B f g x = f (g x)
+Value B = Value(Func{
+    [](const Value& f) -> Value {
+        return Value(Func{
+            [f](const Value& g) -> Value {
+                return Value(Func{
+                    [f,g](const Value& x) -> Value {
+                        Value gx = Apply(g, x);
+                        return Apply(f, gx);
+                    }
+                });
+            }
+        });
+    }
+});
+// I x = x
+Value I = Value(Func{
+    [](const Value& x) -> Value {
+        return x;
+    }
+});
+// K x y = x
+Value K = Value(Func{
+    [](const Value& x) -> Value {
+        return Value(Func{
+            [x](const Value& /*y*/) -> Value {
+                return x;
+            }
+        });
+    }
+});
+// S f g x = f x (g x)
+Value S = Value(Func{
+    [](const Value& f) -> Value {
+        return Value(Func{
+            [f](const Value& g) -> Value {
+                return Value(Func{
+                    [f,g](const Value& x) -> Value {
+                        Value fx = Apply(f, x);
+                        Value gx = Apply(g, x);
+                        return Apply(fx, gx);
+                    }
+                });
+            }
+        });
+    }
+});
+Value applyMany(Value f, const std::vector<Value>& args) {
+    Value r = f;
+    for (auto& a : args) {
+        r = Apply(r, a);
+    }
     return r;
-#endif
 }
-static Ref<Node> ParseNum(unsigned long long n) {
-    if (n == 0) return Z;
-    Ref<Node> N = Z;
-    for (int i = log2_ull(n); i >= 0; --i) {
-        N = Dup_-N;
-        if ((n & (1ull << i)) != 0)
-            N = Succ_-N;
-    }
-    return N;
+Value collectN(int k, std::function<Value(const std::vector<Value>&)> finalize) {
+    struct Collector {
+        int remaining;
+        std::vector<Value> acc;
+        std::function<Value(const std::vector<Value>&)> done;
+        Value step(const Value& v) {
+            acc.push_back(v);
+            if (--remaining == 0) {
+                return done(acc);
+            }
+            Collector next{remaining, acc, done};
+            return Value(Func{
+                [next](const Value& u) mutable {
+                    Collector c = next;
+                    return c.step(u);
+                }
+            });
+        }
+    };
+    Collector c{k, {}, finalize};
+    return Value(Func{[c](const Value& a1) mutable { return c.step(a1); }});
 }
-static Ref<Node> ParseArg(const string& arg) {
-    if (arg == "")
-        throw runtime_error("[ERROR (Runtime)]: Argumento vacío no permitido");
+// Bn: f g x1..xn arg = f (g x1..xn arg)
+Value makeBn(int n) {
+    return Value(Func{[n](const Value& f) {
+        return Value(Func{[n,f](const Value& g) {
+            return collectN(n + 1, [f, g](const std::vector<Value>& xs) -> Value {
+                Value gx = applyMany(g, xs);
+                return Apply(f, gx);
+            });
+        }});
+    }});
+}
+// Cn: f g x1..xn arg = f x1..xn arg g
+Value makeCn(int n) {
+    return Value(Func{[n](const Value& f) {
+        return Value(Func{[n,f](const Value& g) {
+            return collectN(n + 1, [f, g](const std::vector<Value>& xs) -> Value {
+                Value fx = applyMany(f, xs);
+                return Apply(fx, g);
+            });
+        }});
+    }});
+}
+// Sn: f g x1..xn arg = (f x1..xn arg) (g x1..xn arg)
+Value makeSn(int n) {
+    return Value(Func{[n](const Value& f) {
+        return Value(Func{[n,f](const Value& g) {
+            return collectN(n + 1, [f, g](const std::vector<Value>& xs) -> Value {
+                Value fx = applyMany(f, xs);
+                Value gx = applyMany(g, xs);
+                return Apply(fx, gx);
+            });
+        }});
+    }});
+}
+#define BN_MK(N) Value B##N = makeBn(N-1);
+#define CN_MK(N) Value C##N = makeCn(N-1);
+#define SN_MK(N) Value S##N = makeSn(N-1);
+std::string pretty(const Value& v) {
+    if (v.isString()) return v.asString();
+    return "";
+}
+static Value ParseNum(unsigned long long n) {
+    return Value(Func{[n](const Value& f) {
+        return Value(Func{[n,f](const Value& x) {
+            Value acc = x;
+            for (unsigned long long i = 0; i < n; ++i) acc = Apply(f, acc);
+            return acc;
+        }});
+    }});
+}
+static Value ParseArg(const std::string& arg) {
+    if (arg.empty())
+        throw std::runtime_error("[ERROR]: Argumento vacío no permitido");
     if (arg == "true")
-        return K_;
+        return K;
     if (arg == "false")
-        return Z;
-    if (!arg.empty() && arg[0] == '/')
-        return mk<Str>(arg.substr(1));
+        return K-I;
+    if (arg[0] == '/')
+        return Value(arg.substr(1));
     try {
         size_t idx = 0;
-        unsigned long long n = stoull(arg, &idx, 10);
+        unsigned long long n = std::stoull(arg, &idx, 10);
         if (idx == arg.size())
             return ParseNum(n);
     } catch (...) {}
-    throw runtime_error("[ERROR (Runtime)]: Cada argumento debe ser /string, true, false o un número natural");
-}
-static inline Ref<Node> St(const string& s) {
-    return mk<Str>(s);
+    throw std::runtime_error("[ERROR]: Cada argumento debe ser /string, true, false o un número natural");
 }
 |]
 
@@ -335,17 +304,17 @@ pregen e = concat $ HS.toList (aux e)
 
 -- |Genera la expresión en C++ a la cual se transforma la expresión SKI
 gen :: Expr -> String
-gen SComb      = "S_"
-gen KComb      = "K_"
-gen IComb      = "I_"
-gen BComb      = "B_"
-gen CComb      = "C_"
-gen S'Comb     = "Sp_"
-gen C'Comb     = "Cp_"
-gen BsComb     = "Bs_"
-gen (BnComb n) = "Bn" ++ show n ++ "_"
-gen (CnComb n) = "Cn" ++ show n ++ "_"
-gen (SnComb n) = "Sn" ++ show n ++ "_"
+gen SComb      = "S"
+gen KComb      = "K"
+gen IComb      = "I"
+gen BComb      = "B"
+gen CComb      = "C"
+gen S'Comb     = "Sp"
+gen C'Comb     = "Cp"
+gen BsComb     = "Bs"
+gen (BnComb n) = "B" ++ show n
+gen (CnComb n) = "C" ++ show n
+gen (SnComb n) = "S" ++ show n
 gen (Str s)    = "St(" ++ strLiteral s ++ ")"
 gen (EApp lhs rhs@(EApp _ _)) = gen lhs ++ "-(" ++ gen rhs ++ ")"
 gen (EApp lhs rhs) = gen lhs ++ "-" ++ gen rhs
