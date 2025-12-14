@@ -106,6 +106,15 @@ Los modos disponibles son:
 
 Ejemplos de programa por lenguaje se encuentran en `program-samples/`.
 
+### Pruebas
+
+Dentro de `ski-compiler/` se encuentra el archivo de pruebas `tests.py`, el
+cual hay que ejecutarlo ahí mismo. Prueba todos los modos con todos los
+programas de ejemplo.
+
+Nótese que se espera que `twenty.subs` falle en modo estricto, pero funcione
+en modo lazy, pues implementa el combinador `Y`.
+
 ## Reporte
 
 Su código fuente se encuentra bajo `reporte/`, el cual tiene su propio archivo
