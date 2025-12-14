@@ -2,8 +2,8 @@
 \usepackage{util/estilo}
 
 \begin{document}
-    Un problema con que cuenta la compilación introducida en \ref{sssec:ski-intermedio} es que esta tiende
-    a causar que las expresion lambda exploten en tamaño al ser compiladas a SKI.\cite{lambdaToSKI} Esto lo podemos ejemplificar con la expresión $\lambda x. \lambda y. \, y \, x$, pues 
+    Un problema con que cuenta la compilación introducida en \ref{sssec:ski-intermedio}, llamada \textit{abstracción bracket} de Schoenfinkel, es que esta tiende
+    a causar que las expresion lambda exploten cuadráticamente en tamaño al ser compiladas a SKI.\cite{lambdaToSKI} Esto lo podemos ejemplificar con la expresión $\lambda x. \lambda y. \, y \, x$, pues 
     al realizar la traducción a SKI, tenemos que:\cite{lambdaToSKI}
     \begin{center}
         $\lambda x. \lambda y. \, y \, x$\\
@@ -12,7 +12,7 @@
         $\vdots$\\
         $S (S(K \, S)\, (K \, I))(S(K \, K) \, I)$
     \end{center}
-    Es por esto que en archivo $Kiselyov$ se implementa una traducción distinta basada en la traducción en $OCAML$ descrita en el artículo:\cite{lambdaToSKI}.\\
+    Es por esto que en archivo \textit{Kiselyov.hs} se implementa una traducción distinta basada en la versión en \textit{OCaml} descrita en el artículo: \textit{$\lambda$ to SKI, Semantically} \cite{lambdaToSKI}.\\
     Para entender esta traducción primero es necesario introducir $2$ combinadores nuevos que son casos especiales de la función $S$, estos se definen de la siguiente manera:
     \cite{lambdaToSKI}
     \begin{center}
@@ -77,10 +77,10 @@
         \[
             \infer[\textsc{EW}]
             {\Gamma+ \;\models\; d}
-            {\Gamma,\sigma \;\models\; (\models K) \, II\, (\Gamma+ \models d)}
+            {\Gamma,\sigma \;\models\; (\models K) \, \coprod\, (\Gamma+ \models d)}
         \]
         Esta regla nos indica que al momento de introducir una nueva variable que no es usada en el término, simplemente se ignora, ya que esto se realiza con el combinador $K$,
-        producimos un objeto sintáctico que aplica $K$ utilizando la función de aplicación $II$.
+        producimos un objeto sintáctico que aplica $K$ utilizando la función de aplicación $\coprod$.
         \item En caso de no contar con variables libres
         \[
             \infer[\textsc{EAbs0}]
@@ -101,17 +101,17 @@
             {\Gamma_1 \;\models\; d_1
             \quad
             \Gamma_2 \;\models\; d_2 }
-            {\Gamma_1 \sqcup \Gamma_2  \; \models\; (\Gamma_1 \models d_1) \, II \, (\Gamma_2 \models d_2)}
+            {\Gamma_1 \sqcup \Gamma_2  \; \models\; (\Gamma_1 \models d_1) \, \coprod \, (\Gamma_2 \models d_2)}
         \]
-        Esta regla nos indica que al momento de aplicar $d_2$ a una expresión $d_1$, debemos de producir un nuevo objeto sintáctico usando la función de aplicación $II$
+        Esta regla nos indica que al momento de aplicar $d_2$ a una expresión $d_1$, debemos de producir un nuevo objeto sintáctico usando la función de aplicación $\coprod$
     \end{itemize}
-    Por último, tenemos las reglas para la función de aplicación $II$:\cite{lambdaToSKI}
+    Por último, tenemos las reglas para la función de aplicación $\coprod$:\cite{lambdaToSKI}
     \begin{center}
         \begin{itemize}
-            \item $(\models \, d') II (\models \, d) = d' \, d$
-            \item $(\models \, d') II (\tau_n,\ldots,\tau_1 \models \, d) = (\models \, Bd') \, (\tau_n,\ldots,\tau_1 \models \, d)$
-            \item $(\tau_n,\ldots,\tau_1 \models \, d') II (\models \, d) = (\models \, CCd) \, (\tau_n,\ldots,\tau_1 \models \, d')$
-            \item $(\tau_n,\ldots,\tau_1 \models \, d') II (\tau_m,\ldots,\tau_1 \models \, d') = (\tau_n,\ldots,\tau_1 \models (\models S) \, II \, (\tau_n,\ldots,\tau_1 \models \, d')) \, II \, (\tau_m,\ldots,\tau_1 \models \, d)$
+            \item $(\models \, d') \coprod (\models \, d) = d' \, d$
+            \item $(\models \, d') \coprod (\tau_n,\ldots,\tau_1 \models \, d) = (\models \, Bd') \, (\tau_n,\ldots,\tau_1 \models \, d)$
+            \item $(\tau_n,\ldots,\tau_1 \models \, d') \coprod (\models \, d) = (\models \, CCd) \, (\tau_n,\ldots,\tau_1 \models \, d')$
+            \item $(\tau_n,\ldots,\tau_1 \models \, d') \coprod (\tau_m,\ldots,\tau_1 \models \, d') = (\tau_n,\ldots,\tau_1 \models (\models S) \, \coprod \, (\tau_n,\ldots,\tau_1 \models \, d')) \, \coprod \, (\tau_m,\ldots,\tau_1 \models \, d)$
         \end{itemize}
     \end{center}
 \end{document}

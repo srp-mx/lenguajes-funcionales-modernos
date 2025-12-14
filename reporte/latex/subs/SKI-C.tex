@@ -4,12 +4,11 @@
 \begin{document}
 Con el fin de poder obtener los archivos ejecutables de nuestros programas,
 decidimos implementar un módulo encargado de generar el programa equivalente
-en C++ para entonces aprovechar el compilador G++. Tenemos dos implementaciones
+en C++ para entonces aprovechar el compilador g++. Tenemos dos implementaciones
 de este proceso, una que lleva a cabo una
-evaluación estricta o ansiosa y otra que permite la evaluación perezosa pero
-ambas siguen una idea similar.
+evaluación estricta o ansiosa y otra que permite la evaluación perezosa.
 
-La idea consiste en los siguientes puntos:
+La idea de la generación de código estricto consiste en los siguientes puntos:
 \begin{itemize}
 \item Definir una estructura $Value$ en C++ que puede contener una cadena o una
   función, 
@@ -23,7 +22,9 @@ La idea consiste en los siguientes puntos:
     \item Otro caso $\rightarrow$ ocurre un error.
   \end{itemize}
 \item Implementar el comportamiento de los combinadores $S$, $K$, $I$, $B$, $C$
-  y algunas variantes $Bs$, $Cp$ y $Sp$.
+  y algunas variantes $Bs$, $Cp$ y $Sp$, así como las versiones $n$-arias de
+  $S$, $B$ y $C$ que sean usadas en el programa SKI dadas por el algoritmo de
+  la sección \ref{sssec:lambda-ski}.
 
 \item Gracias a estas definiciones lo que sigue es reemplazar las
   expresiones del programa fuente a su definición en C++ que construimos
@@ -35,10 +36,16 @@ La idea consiste en los siguientes puntos:
   y se imprime el resultado.  
 \end{itemize}
 
-La diferencia con la versión de evaluación perezosa es que se incorpora una
-estructura \textit{Thunk} que no es más que una función cuyo tipo de retorno
-es \textit{Value} y que tiene un método \textit{force} el cual
-debe ser llamado para que la función se evalúe. Esta estructura se usa
-para definir que una función del lenguaje recibe un \textit{Thunk} lo que
-permite a las funciones decidir cuándo evaluar su argumento.
+La diferencia con la versión de evaluación perezosa es que en lugar de tratar
+de ejecutar directamente la expresión construida en la traducción a C++, se
+construye una estructura DAG, con nodos internos de aplicación y hojas de
+combinadores y constantes, que se \textit{evoluciona} paso por paso. Esto lo
+vemos con mayor detalle en la sección \ref{sssec:graph-red}.
+
+Se puede enriquecer al cálculo SKI al introducir nuevos combinadores, y al
+realizar esta evolución expandiendo cada combinador lo más a la izquierda
+posible, garantizamos la perezosidad (\textit{lazyness}). Por ello, que se dice
+que SKI es completamente perezoso tras aplicarle dichas optimizaciones
+descritas por Peyton \parencite{peytonjones1987the}, las cuales discutimos en
+la siguiente sección.
 \end{document}
