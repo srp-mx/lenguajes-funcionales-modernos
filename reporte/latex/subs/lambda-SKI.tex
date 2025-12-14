@@ -3,7 +3,7 @@
 
 \begin{document}
     Un problema con que cuenta la compilación introducida en \ref{sssec:ski-intermedio} es que esta tiende
-    a causar que las expresion lambda exploten en tamaño al ser compiladas a SKI.\cite{lambdaToSKI} Esto lo podemos con la expresión $\lambda x. \lambda y. \, y \, x$, pues 
+    a causar que las expresion lambda exploten en tamaño al ser compiladas a SKI.\cite{lambdaToSKI} Esto lo podemos ejemplificar con la expresión $\lambda x. \lambda y. \, y \, x$, pues 
     al realizar la traducción a SKI, tenemos que:\cite{lambdaToSKI}
     \begin{center}
         $\lambda x. \lambda y. \, y \, x$\\
@@ -107,10 +107,11 @@
     \end{itemize}
     Por último, tenemos las reglas para la función de aplicación $II$:\cite{lambdaToSKI}
     \begin{center}
-        $(\models \, d') II (\models \, d) = d' \, d$\\
-        $(\models \, d') II (\tau_n,\ldots,\tau_1 \models \, d) = (\models \, Bd') \, (\tau_n,\ldots,\tau_1 \models \, d)$\\
-        $(\tau_n,\ldots,\tau_1 \models \, d') II (\models \, d) = (\models \, CCd) \, (\tau_n,\ldots,\tau_1 \models \, d')$\\
-        $(\tau_n,\ldots,\tau_1 \models \, d') II (\tau_m,\ldots,\tau_1 \models \, d') = (\tau_n,\ldots,\tau_1 \models (\models S) \, II \, (\tau_n,\ldots,\tau_1 \models \, d')) \, 
-        II \, (\tau_m,\ldots,\tau_1 \models \, d)$\\
+        \begin{itemize}
+            \item $(\models \, d') II (\models \, d) = d' \, d$
+            \item $(\models \, d') II (\tau_n,\ldots,\tau_1 \models \, d) = (\models \, Bd') \, (\tau_n,\ldots,\tau_1 \models \, d)$
+            \item $(\tau_n,\ldots,\tau_1 \models \, d') II (\models \, d) = (\models \, CCd) \, (\tau_n,\ldots,\tau_1 \models \, d')$
+            \item $(\tau_n,\ldots,\tau_1 \models \, d') II (\tau_m,\ldots,\tau_1 \models \, d') = (\tau_n,\ldots,\tau_1 \models (\models S) \, II \, (\tau_n,\ldots,\tau_1 \models \, d')) \, II \, (\tau_m,\ldots,\tau_1 \models \, d)$
+        \end{itemize}
     \end{center}
 \end{document}
