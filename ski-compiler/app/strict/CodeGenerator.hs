@@ -6,7 +6,8 @@ module CodeGenerator (
 ) where
 
 import Expr
-import Text.RawString.QQ;
+import qualified Data.HashSet as HS
+import Text.RawString.QQ
 
 -- |Información de la generación de código
 codeGenInfo :: String
@@ -14,8 +15,12 @@ codeGenInfo = "Generador de código SKI estricto"
 
 -- |Genera el programa objetivo en C++
 codeGen :: Expr -> String
-codeGen expr = prelude ++ "\nconst static Ref<Node> program = "
-    ++ gen (optimizeExpr expr) ++ ";\n" ++ [r|
+codeGen expr =
+    let oexpr = optimizeExpr expr
+    in prelude
+       ++ pregen oexpr
+       ++ "const static Ref<Node> program = " ++ gen oexpr ++ ";"
+       ++ [r|
 int main(int argc, char** argv) {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -35,12 +40,11 @@ int main(int argc, char** argv) {
     }
 #endif
     return 0;
-}
-|]
+}|]
 
 -- |Preludio del código a generar
 prelude :: String
-prelude = [r|
+prelude = [r|// CÓDIGO GENERADO CON srp-mx/lenguajes-funcionales-modernos
 #include <bits/stdc++.h>
 #ifdef TRACE
 constexpr int traceSteps = (TRACE);
@@ -150,11 +154,57 @@ struct ClosureImp : Closure {
         }
     }
 };
+template<typename Iter>
+static inline Ref<Node> ApplyRange(Ref<Node> f, Iter begin, Iter end) {
+    Ref<Node> t = move(f);
+    for (Iter it = begin; it != end; ++it) {
+        t = t - *it;
+    }
+    return t;
+}
 #define COMBINATOR(NAME, ARITY) \
     struct NAME##_Tag_ {}; \
     using NAME = ClosureImp<NAME##_Tag_, ARITY>; \
     template<> inline string NAME::cname() const { return #NAME; } \
     template<> inline Ref<Node> NAME::OnSaturation(const Ref<Node>& arg) const
+struct Bn_Tag_ {};
+#define BN_MK(N) \
+    using Bn##N = ClosureImp<Bn_Tag_, N+2>; \
+    template<> inline string Bn##N::cname() const { return "B" #N; } \
+    template<> inline Ref<Node> Bn##N::OnSaturation(const Ref<Node>& arg) const {\
+        auto caps = this->captures->Collect(); \
+        Ref<Node> f = caps[0], g = caps[1]; \
+        Ref<Node> gx = ApplyRange(g, caps.begin() + 2, caps.end()); \
+        gx = gx - arg; \
+        return f - gx; \
+    } \
+    const static Ref<Bn##N> Bn##N##_ = mk<Bn##N>();
+struct Cn_Tag_ {};
+#define CN_MK(N) \
+    using Cn##N = ClosureImp<Cn_Tag_, N+2>; \
+    template<> inline string Cn##N::cname() const { return "C" #N; } \
+    template<> inline Ref<Node> Cn##N::OnSaturation(const Ref<Node>& arg) const {\
+        auto caps = this->captures->Collect(); \
+        Ref<Node> f = caps[0], g = caps[1]; \
+        Ref<Node> fx = ApplyRange(f, caps.begin() + 2, caps.end()); \
+        fx = fx - arg; \
+        return fx - g; \
+    } \
+    const static Ref<Cn##N> Cn##N##_ = mk<Cn##N>();
+struct Sn_Tag_ {};
+#define SN_MK(N) \
+    using Sn##N = ClosureImp<Sn_Tag_, N+2>; \
+    template<> inline string Sn##N::cname() const { return "S" #N; } \
+    template<> inline Ref<Node> Sn##N::OnSaturation(const Ref<Node>& arg) const {\
+        auto caps = this->captures->Collect(); \
+        Ref<Node> f = caps[0], g = caps[1]; \
+        Ref<Node> fx = ApplyRange(f, caps.begin() + 2, caps.end()); \
+        fx = fx - arg; \
+        Ref<Node> gx = ApplyRange(g, caps.begin() + 2, caps.end()); \
+        gx = gx - arg; \
+        return fx - gx; \
+    } \
+    const static Ref<Sn##N> Sn##N##_ = mk<Sn##N>();
 COMBINATOR(I, 1) { return arg; }
 COMBINATOR (K, 2) { return captures->Value; }
 COMBINATOR(S, 3) {
@@ -273,6 +323,16 @@ static inline Ref<Node> St(const string& s) {
 }
 |]
 
+-- |Genera información adicional en C++ dependiente del programa
+pregen :: Expr -> String
+pregen e = concat $ HS.toList (aux e)
+    where aux :: Expr -> HS.HashSet String -- Genera las constantes de los Bn/Cn/Sn usados
+          aux (BnComb n) = HS.singleton $ "BN_MK(" ++ show n ++ ");\n"
+          aux (CnComb n) = HS.singleton $ "CN_MK(" ++ show n ++ ");\n"
+          aux (SnComb n) = HS.singleton $ "SN_MK(" ++ show n ++ ");\n"
+          aux (EApp lhs rhs) = HS.union (aux lhs) (aux rhs)
+          aux _ = HS.empty
+
 -- |Genera la expresión en C++ a la cual se transforma la expresión SKI
 gen :: Expr -> String
 gen SComb      = "S_"
@@ -283,7 +343,10 @@ gen CComb      = "C_"
 gen S'Comb     = "Sp_"
 gen C'Comb     = "Cp_"
 gen BsComb     = "Bs_"
-gen (Str s)   = "St(" ++ strLiteral s ++ ")"
+gen (BnComb n) = "Bn" ++ show n ++ "_"
+gen (CnComb n) = "Cn" ++ show n ++ "_"
+gen (SnComb n) = "Sn" ++ show n ++ "_"
+gen (Str s)    = "St(" ++ strLiteral s ++ ")"
 gen (EApp lhs rhs@(EApp _ _)) = gen lhs ++ "-(" ++ gen rhs ++ ")"
 gen (EApp lhs rhs) = gen lhs ++ "-" ++ gen rhs
 

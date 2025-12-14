@@ -14,6 +14,9 @@ data Expr = SComb
           | S'Comb
           | C'Comb
           | BsComb
+          | BnComb Int
+          | CnComb Int
+          | SnComb Int
           | Str String
           | EApp Expr Expr
           deriving (Show, Eq)
@@ -32,6 +35,9 @@ showTree = aux (0,[]) ""
             S'Comb -> indent level bars ++ prefix ++ "S'\n"
             C'Comb -> indent level bars ++ prefix ++ "C'\n"
             BsComb -> indent level bars ++ prefix ++ "B*\n"
+            BnComb n -> indent level bars ++ prefix ++ "Bn" ++ show n ++ "\n"
+            CnComb n -> indent level bars ++ prefix ++ "Cn" ++ show n ++ "\n"
+            SnComb n -> indent level bars ++ prefix ++ "Sn" ++ show n ++ "\n"
             Str s -> indent level bars ++ prefix ++ "\"" ++ s ++ "\"\n"
             EApp l r -> indent level bars ++ prefix ++ "App\n"
                         ++ aux (level+1,bars++[True])  "├─›" l
@@ -65,15 +71,6 @@ optimizeExprStep e0 | origLen == minLen   = e0
 
 -- |Optimiza una expresión SKI+ con el método de Peyton
 peytonOptimize :: Expr -> Expr
-peytonOptimize SComb = SComb
-peytonOptimize KComb = KComb
-peytonOptimize IComb = IComb
-peytonOptimize BComb = BComb
-peytonOptimize CComb = CComb
-peytonOptimize S'Comb = S'Comb
-peytonOptimize C'Comb = C'Comb
-peytonOptimize BsComb = BsComb
-peytonOptimize (Str s) = Str s
 peytonOptimize (EApp e1 e2) =
     let e1' = peytonOptimize e1
         rhs = peytonOptimize e2
@@ -100,15 +97,12 @@ peytonOptimize (EApp e1 e2) =
                     EApp (EApp (EApp S'Comb p) q) r
                 _ -> EApp e1' rhs
         _ -> EApp e1' rhs
+peytonOptimize e = e
 
 -- |Simplifica la expresión en O(n) a únicamente S, K, I para que funcione
 --  mejor el algoritmo de optimización (posiblemente).
 simplExpr :: Expr -> Expr
-simplExpr SComb = SComb
-simplExpr KComb = KComb
-simplExpr IComb = IComb
 simplExpr (EApp e1 e2) = EApp (simplExpr e1) (simplExpr e2)
-simplExpr (Str s) = Str s
 simplExpr BComb = EApp (EApp SComb (EApp KComb SComb)) KComb -- B = S (S K) K
 simplExpr CComb = -- C = S (S (K (S (K S) K)) S) (K K)
     EApp          -- C = { S ( { S (K (S (K S) K)) } S) } (K K)
@@ -149,3 +143,4 @@ simplExpr BsComb = -- B* = S ( S (K K) (S (K S) (S (K K) I)) ) ( K (K (S (K K) I
           (EApp SComb (EApp KComb SComb))
           (EApp (EApp SComb (EApp KComb KComb)) IComb))))
     (EApp KComb (EApp KComb (EApp (EApp SComb (EApp KComb KComb)) IComb)))
+simplExpr e = e

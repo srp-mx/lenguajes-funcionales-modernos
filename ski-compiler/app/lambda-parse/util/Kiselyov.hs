@@ -83,45 +83,21 @@ data Bulk
 uclose :: Expr -> Bulk
 uclose = Core
 
--- |Caso base de Bn
-kB' :: Expr
-kB' = BComb $!! BComb
-
--- |Caso base de Sn
-kS' :: Expr
-kS' = BComb $!! (BComb $!! SComb) $!! BComb
-
--- |Caso base de Cn
-kC' :: Expr
-kC' = BComb $!! (BComb $!! CComb) $!! BComb
-
--- |Generador de Bn
-kBs :: [Expr]
-kBs = iterate (\d -> kB' $!! d) BComb
-
--- |Generador de Sn
-kSs :: [Expr]
-kSs = iterate (\d -> kS' $!! d) SComb
-
--- |Generador de Cn
-kCs :: [Expr]
-kCs = iterate (\d -> kC' $!! d) CComb
-
 -- |Función auxiliar de proyección de Bulk->Open (Expr)
 uopen :: Bulk -> Expr
 uopen (Core d) = d
 uopen (Bn n)
     | n <= 0 = IComb
     | n == 1 = BComb
-    | otherwise = kBs !! (n-1)
+    | otherwise = BnComb n
 uopen (Cn n)
     | n <= 0 = IComb
     | n == 1 = CComb
-    | otherwise = kCs !! (n-1)
+    | otherwise = CnComb n
 uopen (Sn n)
     | n <= 0 = IComb
     | n == 1 = SComb
-    | otherwise = kSs !! (n-1)
+    | otherwise = SnComb n
 uopen (UApp x y) = uopen x $!! uopen y
 
 -- |Operador que sirve como atajo para UApp, imitando el código en OCaml
