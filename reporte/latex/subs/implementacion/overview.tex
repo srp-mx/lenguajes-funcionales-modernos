@@ -164,4 +164,11 @@ data Expr = SComb
           deriving (Show, Eq)
 \end{minted}
 
+Como un detalle adicional, el código generado perezoso en C++ implementa un
+recolector de basura primitivo haciendo uso de \textit{apuntadores
+inteligentes} y reusando referencias lo más posible, en particular en la
+captura de argumentos mediante una lista ligada que reusa las capturas
+anteriores aunque el objeto sea uno nuevo, ya que los nodos de la gráfica los
+implementamos de manera inmutable.
+
 \end{document}

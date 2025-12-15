@@ -1,10 +1,85 @@
 \documentclass[main.tex]{subfiles}
 \usepackage{util/estilo}
 
-%% TODO: Esto es solamente de relleno para evaluar la tipografía
-
 \begin{document}
 
+Ejecutando nuestras pruebas observamos lo que esperábamos; en todo caso se
+obtienen los resultados correctos o bien el programa estricto no termina o hace
+un \textit{segfault} por tratar de expandir de manera estricta un término que
+contiene un operador de punto fijo no-estricto (en particular $Y$).
 
+Además, aunque los programas son sencillos, se alcanzan resultados de manera
+no restrictivamente lenta. Si compilamos un programa ski que sólo tiene a \textit{I},
+y en la línea de comandos ejecutamos \texttt{100000 /a /b}, se termina casi
+inmediatamente. El generador estricto termina en $294\,ms$, mientras que el
+perezoso en $700\,ms$. Esto hace sentido, pues no hay mucho que pueda ganar la
+evaluación perezosa en este caso, pero sí tiene una carga adicional en mantener
+y modificar la estructura del árbol así como la recolección de basura.
+
+Esto es en una laptop con las siguientes especificaciones de CPU:
+\begin{verbatim}
+Architecture:        x86_64
+CPU op-mode(s):      32-bit, 64-bit
+Address sizes:       39 bits physical, 48 bits virtual
+Byte Order:          Little Endian
+CPU(s):              4
+On-line CPU(s) list: 0-3
+Vendor ID:           GenuineIntel
+Model name:          i5-5300U CPU @ 2.30GHz
+Thread(s) per core:  2
+CPU max MHz:         2900.0000
+CPU min MHz:         500.0000
+BogoMIPS:            4589.64
+L1d cache:           64 KiB (2 instances)
+L1i cache:           64 KiB (2 instances)
+L2 cache:            512 KiB (2 instances)
+L3 cache:            3 MiB (1 instance)
+\end{verbatim}
+
+A continuación incluimos el programa \textit{twenty.subs} que hace un caso
+de estudio interesante.
+
+\begin{verbatim}
+// Punto de entrada del programa
+main = ((Mul Four) Five);
+
+// Aritmética básica
+Zero = [f [x x]];
+Succ n = [f [x (f ((n f) x))]];
+Add m n = [f [x ((m f) ((n f) x))]];
+Four = (Succ (Succ (Succ (Succ Zero))));
+Five = (Succ (Succ (Succ (Succ (Succ Zero)))));
+
+// Booleanos
+True  = [t [f t]];
+False = [t [f f]];
+IsZero n = ((n [x False]) True);
+
+// Predecesor
+Pred n = [f [x (((n [g [h (h (g f))]]) [u x]) [u u])]];
+
+// Combinador Y
+Y f = ([x (f (x x))] [x (f (x x))]);
+
+// Multiplicación recursiva con Y
+// Mul m n = if (IsZero m) then Zero
+//           else Add n (Mul (Pred m) n)
+Mul = (Y [self [m [n (((IsZero m) Zero)
+         ((Add n) ((self (Pred m)) n))) ] ] ]);
+\end{verbatim}
+
+El archivo generado del programa \textit{twenty.subs} con evaluación estricta
+es de $108\,KB$, y el de evaluación perezosa de $168\,KB$. Ambos son compilados
+haciendo uso de \textit{stripping}, por lo que procura minimizar el tamaño del
+ejecutable dentro de lo que aún sea altamente eficiente.
+
+En ninguno de los programas generados se rebasó la aridad 4 en los combinadores
+$Cn$, $Bn$ ni $Sn$, generalmente llegando a la aridad 3 y 2.
+
+Así, aunque en general es más eficiente un sencillo código evaluado de manera
+estricta, podemos ver en la imposibilidad de ejecutar \textit{twenty.subs} que
+la evaluación perezosa cuenta con ventajas al poder ejecutar más programas de
+manera exitosa y optimizar programas que producen una alta cantidad de
+información que descartarán más adelante.
 
 \end{document}
