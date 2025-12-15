@@ -1,0 +1,98 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+La primera optimización importante es cambiar del método de abstracción bracket a la
+construcción de espacio $O(n)$ de Kiselyov mencionada en la sección
+\ref{sssec:lambda-ski}.
+
+En el algoritmo mismo de Kiselyov, se definen estructuras intermedias llamados
+\textit{operadores abiertos} sobre los cuales se van agrupando combinadores
+\textit{semánticamente}, con base en los índices de Brujin, para formar
+versiones $n$-arias de $B$, $C$ y $S$, implementando composición de múltiples
+funciones (aplicación múltiple hacia el término derecho, $B\,f\,g\,xs\mapsto f
+(g\leftarrow xs)$), intercambio de orden de múltiples funciones (aplicación
+múltiple hacia el término izquierdo $C\,f\,g\,xs\mapsto (f\leftarrow xs) g$), y
+aplicación múltiple a dos funciones (aplicación hacia ambos términos
+$S\,f\,g\,xs\mapsto (f\leftarrow xs) (g\leftarrow xs)$) \parencite{lambdaToSKI}.
+
+Asimismo, se definen operaciones de \textit{proyección}, los cuales
+``observan'' operadores abiertos para, si así se desea, traducirlos de vuelta
+al cálculo SKI. \parencite{lambdaToSKI} Una técnica de optimización es tener
+estos combinadores $n$-arios como parte de nuestro SKI enriquecido, y que se
+proyecten los operadores abiertos directamente a ellos. Una desventaja de
+esto es que aumenta la complejidad de compilación a C++, pero podemos reducir
+su impacto al hacer uso extensivo de macros y plantillas, permitiendo
+además una mayor capacidad de optimización por el compilador de C++.
+
+La segunda optimización importante es el enriquecimiento de SKI con los
+combinadores $B$ y $C$ como se menciono antes, y los combinadores $S'$, $C'$ y
+$B^*$, que aplican algo similar a una \textit{continuación} al incorporar un
+argumento $c$ al inicio de $S$, $C$ y $B$ respectivamente
+\parencite{peytonjones1987the}.
+
+Se definen como \parencite{peytonjones1987the}
+\begin{itemize}
+    \item $S'\,c\,f\,g\,x\,\rightarrow\,c\,(f\,x)\,(g\,x)$
+    \item $C'\,c\,f\,g\,x\,\rightarrow\,c\,(f\,(g\,x))$
+    \item $B^*\,c\,f\,g\,x\,\rightarrow\,c\,(f\,x)\,g$
+\end{itemize}
+
+Así, las reglas de optimización de Peyton son \parencite{peytonjones1987the}
+\begin{itemize}
+    \item $S\,(K\,p)\,(K\,q) \implies K\,(p\,q)$ la $K$-optimización, que
+        proviene de aplicaciones dentro de una abstracción lambda que no
+        utilizan la variable inmediatamente arriba.
+
+    \item $S\,(K\,f)\,g \implies B\,f\,g$ la $B$-optimización, que proviene
+        de aplicaciones dentro de una abstracción lambda cuyo lado derecho es
+        la varible inmediatamente arriba. ``Manda'' un argumento a la rama izquierda.
+        Es análogo a la $\eta$-conversión \parencite{peytonjones1987the}.
+
+        Aplicando un argumento podemos entender mejor el comportamiento:
+        $$S\,(K\,f)\,g\,x \to (K\,f\,x)\,(g\,x) \to f\,(g\,x)$$
+
+    \item $S\,f\,(K\,g) \implies C\,f\,g$ la $C$-optimización, que es análoga a
+        la $B$-optimización, pero ``manda'' el argumento a la rama derecha.
+        Podemos también apreciar esto mejor al darle un argumento:
+        $$S\,f\,(K\,g)\,x \to (f\,x)\,(K\,g\,x) \to (f\,x)\,g$$
+
+        Notemos que la regla $B$ y $C$ son versiones de cierto modo débiles de $S$,
+        la cual manda el argumento a ambas ramas, $S\,f\,g\,x\to (f\,x)\,(g\,x)$.
+        Así estas optimizan este comportamiento que es común en las aplicaciones.
+
+    \item $S\,(B\,x\,y)\,z \implies S'\,x\,y\,z$ la $S'$-optimización. Si
+        tenemos muchas expresiones lambdas anidadas, i.e. una subexpresión de
+        muchos argumentos, entonces se aplicará muchas veces la
+        $B$-optimización junto con el combinador $S$ para repetirlo. Para
+        reducir estas expansiones, podemos introducir ``contexto'' en la forma
+        de un argumento que domina la expansión.
+
+        Veamos cómo se expande lo anterior 
+        $$S\,(B\,c\,f)\,g\,x \to (B\,c\,f\,x)\,(g\,a) \to c\,(f\,x)\,(g\,x)$$
+
+        Notemos como esto corresponde a, si $c$ es la abstracción lambda interior
+        en $\lambda x . \lambda y . f_{xy} g_{xy}$, donde denotamos como subíndice
+        de $f$ y $g$ sus dependencias, esto es evaluar $f$ y $g$ en el entorno
+        de $x$ y pasar $f_y$ y $g_y$ al entorno de $y$.
+
+    \item $B\,(c\,f)\,g\implies B'\,c\,f\,g$ la $B'$-optimización. Es análoga a
+        la $S'$-optimización pero si sólo el lado derecho depende de la abstracción
+        exterior, en el ejemplo anterior $x$.
+
+        En otras palabras, aplica al caso $\lambda x . \lambda y . f_{y} g_{xy}$.
+
+    \item $C\,(B\,c\,f)\,g\implies C'\,c\,f\,g$ la $C'$-optimización. Es análoga a
+        la $S'$-optimización pero si sólo el lado izquierdo depende de la abstracción
+        exterior, en el ejemplo anterior $x$.
+
+        En otras palabras, aplica al caso $\lambda x . \lambda y . f_{xy} g_{y}$.
+\end{itemize}
+
+Si se desea saber exactamente cuáles optimizaciones de SKI implementamos,
+Peyton nos sintetiza estas optimizaciones y otras pocas triviales en su figura
+16.5 en la sección 16.2 \textit{Optimizations to the SK scheme} de su libro
+\textit{The Implementation of Functional Programming Languages}
+\parencite{peytonjones1987the}.
+
+\end{document}
