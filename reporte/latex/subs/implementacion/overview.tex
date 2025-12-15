@@ -1,0 +1,167 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+
+Se implementó la solución en Haskell en un proyecto de Cabal, con generación de
+código en C++.
+
+Se definieron tres lenguajes de programación en dos modos: \textit{estricto}
+y \textit{perezoso}. Estos lenguajes son, el cálculo SKI con comentarios y
+cadenas, una versión del cálculo lambda parentizada (similar a Lisp o iswim)
+con cadenas y comentarios, y un lenguaje original llamado \textit{subs}, que
+comparte algunas similaridades sintácticas con Haskell, pero sin recursividad
+directa y con nuestro cálculo lambda parentizado como manera de construir los
+cuerpos de las funciones.
+
+La gramática de \textit{ski} es:
+\begin{verbatim}
+<Expresion> ::= <Atomo> { <Atomo> }*
+<Atomo> ::= S | s | K | k | I | i | <String>
+              | ( <Expresion> )
+<String> ::= una cadena multilínea entre "
+<Comentario> ::= una línea que inicia en //
+<MComentario> ::= texto encerrado entre /* y */
+<Espacio> ::= espacio en blanco
+\end{verbatim}
+
+La gramática de \textit{lambda} es:
+\begin{verbatim}
+<Expresion> ::= <Identificador>
+             |  <String>
+             |  ( <Expresion> <Expresion> )
+             |  [ <Identificador> <Expresion> ]
+<String> ::= una cadena multilínea entre "
+<Identificador> ::= comienza con una letra o .
+    y puede continuar con letras, dígitos, ', ?, _, -, .
+<Comentario> ::= una línea que inicia en //
+<MComentario> ::= texto encerrado entre /* y */
+<Espacio> ::= espacio en blanco
+\end{verbatim}
+
+La gramática de \textit{subs} es:
+\begin{verbatim}
+<Programa> ::=
+    <Declaracion> { ; { ; }* <Declaracion> }* { ; }*
+<Declaracion> ::=
+    <Identificador> { <Identificador> }* = <Expresion>
+<Expresion> ::= <Identificador>
+             |  <String>
+             |  ( <Expresion> <Expresion> )
+             |  [ <Identificador> <Expresion> ]
+<String> ::= una cadena multilínea entre "
+<Identificador> ::= comienza con una letra o . y puede
+    continuar con letras, dígitos, ', ?, _, -, .
+<Comentario> ::= una línea que inicia en //
+<MComentario> ::= texto encerrado entre /* y */
+<Espacio> ::= espacio en blanco
+\end{verbatim}
+
+En todo caso, parte del proceso de compilación es la reducción a el lenguaje
+anterior, \textit{subs} se reduce a una expresión lambda por medio de
+identificar las definiciones y variables libres, asegurar que no hay
+definiciones duplicadas, construir una gráfica dirigida de la variable libre
+hacia su definición, asegurarse que esta gráfica sea una DAG, hacer las
+sustituciones de las hojas hacia arriba hasta que la declaración \textit{main}
+tenga como lado derecho una expresión lambda pura. Asimismo, el lenguaje
+\textit{lambda} (así como \textit{subs} al llegar a este paso), se reduce a
+nuestra versión enriquecida de SKI por medio del algoritmo de Kiselyov.
+Finalmente \textit{ski} se transforma con las optimizaciones de Peyton (así
+como \textit{subs} y \textit{lambda} al llegar a este paso) y se genera el
+código ya sea con el generador \textit{strict} o \textit{lazy}.
+
+Además, se realizaron pruebas al construir, compilar y ejecutar programas en
+todos estos lenguajes y generadores de código en el archivo \textit{tests.py}.
+
+Estos procesos se ven reflejados en la estructura del proyecto dada a
+continuación, notando que los \textit{Lexer}, \textit{Parser} y
+\textit{CodeGenerator} particulares a utilizar son seleccionados al momento de
+compilación del proyecto, i.e. al designar los distintos objetivos de
+compilación en el archivo \textit{.cabal}.
+\begin{verbatim}
+ski-compiler/
+├── app
+│   ├── common
+│   │   ├── Expr.hs
+│   │   ├── Graph.hs
+│   │   └── Util.hs
+│   ├── lambda-parse
+│   │   ├── Lexer.hs
+│   │   ├── LexerSpec.txt
+│   │   ├── Parser.hs
+│   │   └── util
+│   │       ├── Kiselyov.hs
+│   │       ├── LambdaDesugar.hs
+│   │       ├── Lambda.hs
+│   │       └── LambdaParser.hs
+│   ├── lazy
+│   │   └── CodeGenerator.hs
+│   ├── Main.hs
+│   ├── ski-parse
+│   │   ├── Lexer.hs
+│   │   ├── LexerSpec.txt
+│   │   └── Parser.hs
+│   ├── strict
+│   │   └── CodeGenerator.hs
+│   └── subs-parse
+│       ├── Lexer.hs
+│       ├── LexerSpec.txt
+│       └── Parser.hs
+├── CHANGELOG.md
+├── LICENSE
+├── ski-compiler.cabal
+└── tests.py
+\end{verbatim}
+
+Se optó por no implementar operaciones aritméticas y demás básicas para
+centralizar el proyecto en las técnicas particulares al paradigma funcional.
+Como operaciones entre términos no-funcionales usamos las cadenas, y recordemos
+que podemos codificar números y sus operaciones como numerales de Church, lo
+cual hacemos extensamente en los programas de ejemplo y al momento de
+interpretar la entrada de la línea de comandos, utilizando la técnica
+\textit{duplica e incrementa} para codificarlos en $O(\log{n})$ combinadores en
+el generador perezoso (el estricto lo expandiría inmediatamente a su versión
+$O(n)$ por lo que no vale la pena esta representación).
+
+Nuestros lexers los diseñamos de modo que \textit{lambda} y \textit{subs} sean
+compatibles, generando el código en Haskell a partir de una especificación de
+expresiones regulares utilizando el generador de analizadores léxicos del
+reporte \textit{Construcción de un Generador de Analizadores Léxicos en Haskell}
+\parencite{compiladoresLexer2025}.
+
+El \textit{parsing} en los tres casos se hizo manualmente pues es muy sencilla
+la gramática de estos lenguajes y además permite una mayor flexibilidad en el
+manejo de mensajes y errores, así como qué informacion pasa a las siguientes
+etapas. En el caso de \textit{ski}, el parsing se hace token por token armando
+el \textit{árbol de sintaxis abstracta} (AST) de arriba hacia abajo por
+descenso recursivo, construyendo una derivación por la izquierda de izquierda a
+derecha en ese respecto semejante en un \textit{parser} LL(1), además va
+modificando el árbol de derivación directamente (con optimización de cola) y no
+tiene backtracking.
+
+Tanto \textit{lambda} como \textit{subs} comparten la mayor parte de su parser,
+distinguiéndose en su comportamiento ante variables libres (y las extensiones
+que realiza \textit{subs} a \textit{lambda} como declaraciones). Esto sigue un
+esquema de analizador por descenso recursivo más tradicional, teniendo una
+correspondencia más directa con su gramática.
+
+La estructura más importante es nuestra \textit{Expr}, que corresponde con
+nuestro SKI enriquecido. Su definición es la siguiente:
+\begin{minted}{Haskell}
+data Expr = SComb
+          | KComb
+          | IComb
+          | BComb
+          | CComb
+          | S'Comb
+          | C'Comb
+          | BsComb
+          | BnComb Int
+          | CnComb Int
+          | SnComb Int
+          | Str String
+          | EApp Expr Expr
+          deriving (Show, Eq)
+\end{minted}
+
+\end{document}
