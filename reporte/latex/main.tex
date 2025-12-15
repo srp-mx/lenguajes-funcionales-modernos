@@ -4,7 +4,7 @@
 % Title and authors
 \title{
     \rule{\linewidth}{2pt}
-    \Title{Estrategias de optimización en compiladores funcionales.} \\[-1ex]
+    \Title{Estrategias de optimización en compiladores de lenguajes funcionales modernos} \\[-1ex]
     \rule{\linewidth}{2pt}
 }
 
@@ -39,11 +39,29 @@
 \pagestyle{plain}
 
 \begin{abstract}
-    %% TODO
+    Los compiladores de lenguajes funcionales modernos enfrentan el doble
+    desafío de preservar las abstracciones de alto nivel mientras ofrecen una
+    ejecución eficiente en arquitecturas de bajo nivel. En este reporte
+    investigamos técnicas de optimización para compiladores funcionales
+    mediante el diseño e implementación de \emph{subs}, un lenguaje funcional
+    que demuestra una compilación en múltiples etapas. Subs se traduce al
+    cálculo lambda, el cual posteriormente se convierte en un \textit{cálculo
+    de combinadores SKI extendido} enriquecido con combinadores adicionales que
+    permiten una optimización y ejecución práctica y eficiente. A partir de
+    esta representación intermedia, los programas se compilan hacia dos
+    entornos distintos en C++: uno \emph{estricto} y uno \emph{perezoso}. El
+    runtime perezoso aprovecha la técnica de \emph{graph reduction} para
+    modelar la evaluación no estricta, mientras que el runtime estricto
+    proporciona características de rendimiento predecibles. Nuestro trabajo
+    ilustra cómo los supercombinadores pueden servir como una representación
+    intermedia práctica y optimizable, conectando los fundamentos teóricos y
+    prácticos del campo de los compiladores de lenguajes funcionales.
 \end{abstract}
 
 \begin{IEEEkeywords}
-    %% TODO
+    SKI, Combinadores, Supercombinadores, Cálculo lambda, Optimización de código,
+    Lenguajes funcionales, Graph reduction, Lambda lifting, Generación de código,
+    Compiladores, Lenguajes de programación
 \end{IEEEkeywords}
 
 \section{Preliminares}\label{sec:preliminares}

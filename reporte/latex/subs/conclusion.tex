@@ -22,12 +22,15 @@ permitirnos explorar nuevos patrones de programación. Por otro lado, se podría
 mediante la reutilización de subgráficas y técnicas de recolección de basura. Por ultimo, podríamos optimizar el proceso de
 reducción de gráficas mediante computo paralelo, una idea que se ha explorado anteriormente en varios artículos. \cite{Augustsson}
 
-También valdría la pena explorar otros métodos modernos de optimización, así como
-la generación a una \textit{spineless tagless g-machine} (STG) como lo hace Haskell
-y abandonar la reducción a supercombinadores en favor de aumentar el nivel semántico
-con el que se llega a esta etapa. Otra alternativa involucra el hacer uso de algún
-tipo de caché de expresiones ya computadas para poder ahorrar tiempo de cómputo en
-expresiones comunes y vistas muchas veces, quizás con la implementación de \textit{hashing}
-y un caché \textit{LFU}, \textit{LRU}, etc.
+También valdría la pena explorar otros métodos modernos de optimización, así
+como la generación a una \textit{spineless tagless g-machine} (STG) como lo
+hace Haskell y abandonar la reducción a supercombinadores en favor de aumentar
+el nivel semántico con el que se llega a esta etapa. Recordemos que
+\textit{Miranda}, un precursor a Haskell, hacía su compilación de la misma
+forma que nosotros aquí, con una máquina ejecutora de SKI
+\parencite{kidney2020ski}. Otra alternativa involucra el hacer uso de algún
+tipo de caché de expresiones ya computadas para poder ahorrar tiempo de cómputo
+en expresiones comunes y vistas muchas veces, quizás con la implementación de
+\textit{hashing} y un caché \textit{LFU}, \textit{LRU}, etc.
 
 \end{document}
