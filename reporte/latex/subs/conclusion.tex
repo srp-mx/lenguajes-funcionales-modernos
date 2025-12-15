@@ -6,17 +6,28 @@ Durante el desarrollo de este trabajo, hemos visitado la definición de cálculo
 profundizar en el concepto del cálculo SKI. Utilizando los conceptos explorados anteriormente pudimos utilizar algoritmos 
 de traducción entre el cálculo lambda y cálculo SKI, así como la traducción de calculo SKI al lenguaje C para desarrollar 
 una implementación concreta del cálculo lambda usando al cálculo SKI como un lenguaje intermedio para la evaluación de los 
-resultados antes de ser pasado finalmente a un lenguaje para su ejecución.\\
+resultados antes de ser pasado finalmente a un lenguaje para su ejecución.
+
 Sumado a esto, exploramos distintas estrategias de optimización para mejorar el rendimiento de nuestro trabajo, dichas 
 estrategias consideraron tanto optimizaciones propias del cálculo SKI, como métodos de reducciones en gráficas para incorporar 
 la evaluación perezosa en la implementación antes mencionada. Asimismo, también se utilizó la técnica de Lambda Lifiting 
 para optimizar tanto el uso del espacio mediante instancias intermedias como la aplicación de operaciones de sustitución 
-simultanea para mejorar el rendimiento de nuestro compilador. \\
+simultanea para mejorar el rendimiento de nuestro compilador.
+
 Habiendo investigado las estrategias de investigación mencionadas anteriormente, nos es posible entender mas claramente el
 funcionamiento de los compiladores para lenguajes funcionales. Sin embargo, también nos es posible saber que aun hay 
 distintas formas en las que podríamos expandir nuestra investigación y de esta forma optimizar nuestra implementación. 
 Una de estas formas podría ser la incorporación de otros combinadores, como lo son Y, B, C, W, etc., los cuales podrían 
 permitirnos explorar nuevos patrones de programación. Por otro lado, se podría optimizar el proceso de reducción de gráficas 
 mediante la reutilización de subgráficas y técnicas de recolección de basura. Por ultimo, podríamos optimizar el proceso de
-reducción de gráficas mediante computo paralelo, una idea que se ha explorado anteriormente en varios artículos. \cite{Augustsson}\\ 
+reducción de gráficas mediante computo paralelo, una idea que se ha explorado anteriormente en varios artículos. \cite{Augustsson}
+
+También valdría la pena explorar otros métodos modernos de optimización, así como
+la generación a una \textit{spineless tagless g-machine} (STG) como lo hace Haskell
+y abandonar la reducción a supercombinadores en favor de aumentar el nivel semántico
+con el que se llega a esta etapa. Otra alternativa involucra el hacer uso de algún
+tipo de caché de expresiones ya computadas para poder ahorrar tiempo de cómputo en
+expresiones comunes y vistas muchas veces, quizás con la implementación de \textit{hashing}
+y un caché \textit{LFU}, \textit{LRU}, etc.
+
 \end{document}
