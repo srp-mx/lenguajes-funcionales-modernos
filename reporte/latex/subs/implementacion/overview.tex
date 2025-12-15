@@ -6,13 +6,15 @@
 Se implementó la solución en Haskell en un proyecto de Cabal, con generación de
 código en C++.
 
-Se definieron tres lenguajes de programación en dos modos: \textit{estricto}
-y \textit{perezoso}. Estos lenguajes son, el cálculo SKI con comentarios y
+Se definieron tres lenguajes de programación en dos modos: \textit{estricto} y
+\textit{perezoso}. Estos lenguajes son, el cálculo SKI con comentarios y
 cadenas, una versión del cálculo lambda parentizada (similar a Lisp o iswim)
 con cadenas y comentarios, y un lenguaje original llamado \textit{subs}, que
 comparte algunas similaridades sintácticas con Haskell, pero sin recursividad
 directa y con nuestro cálculo lambda parentizado como manera de construir los
-cuerpos de las funciones.
+cuerpos de las funciones. Pensamos en \textit{subs} como un ``cálculo lambda de
+pizarrón'', con declaraciones y sustituciones pero respetando que no debe tener
+recursión, únicamente puntos fijos.
 
 La gramática de \textit{ski} es:
 \begin{verbatim}
@@ -69,6 +71,10 @@ nuestra versión enriquecida de SKI por medio del algoritmo de Kiselyov.
 Finalmente \textit{ski} se transforma con las optimizaciones de Peyton (así
 como \textit{subs} y \textit{lambda} al llegar a este paso) y se genera el
 código ya sea con el generador \textit{strict} o \textit{lazy}.
+
+Así, de manera implícita para \textit{subs} y \textit{lambda}, realizamos
+\textit{lambda lifting} con nuestra traducción a SKI con el algoritmo de
+Kiselyov.
 
 Además, se realizaron pruebas al construir, compilar y ejecutar programas en
 todos estos lenguajes y generadores de código en el archivo \textit{tests.py}.
@@ -170,5 +176,14 @@ inteligentes} y reusando referencias lo más posible, en particular en la
 captura de argumentos mediante una lista ligada que reusa las capturas
 anteriores aunque el objeto sea uno nuevo, ya que los nodos de la gráfica los
 implementamos de manera inmutable.
+
+Nuestro trabajo es una base interesante para expandir el lenguaje, ya que
+podríamos incluír un preámbulo con declaraciones comunes predefinidas como
+operaciones con numerales de Church, combinadores importantes, booleanos
+codificados, y demás, así como implementar números (de máquina) con expresiones
+aritméticas, de punto flotante, enteros, con y sin signo, etc. Además se podría
+extender para incluir recursión, recursión mutua, tipos, etc. Sabemos como
+manejar estas construcciones ``fuera de SKI/lambda/subs puro'' pues lo hemos hecho con
+nuestras cadenas y sus concatenaciones.
 
 \end{document}
